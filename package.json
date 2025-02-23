@@ -9,7 +9,9 @@
     "build": "bunx --bun wxt build",
     "zip": "bunx --bun wxt zip",
     "compile": "tsc --noEmit",
-    "postinstall": "bunx --bun wxt prepare"
+    "postinstall": "bunx --bun wxt prepare",
+    "lint": "eslint \"entrypoints/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "eslint \"entrypoints/**/*.{js,jsx,ts,tsx}\" --fix"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -19,8 +21,16 @@
     "@types/chrome": "^0.0.280",
     "@types/react": "^19.0.1",
     "@types/react-dom": "^19.0.2",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
     "@wxt-dev/module-react": "^1.1.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.0.0",
+    "eslint-plugin-react": "^7.0.0",
+    "eslint-plugin-react-hooks": "^4.0.0",
+    "postcss": "^8.5.3",
     "prettier": "^3.5.2",
+    "tailwindcss": "^3.4.1",
     "typescript": "^5.6.3",
     "wxt": "^0.19.13"
   }
