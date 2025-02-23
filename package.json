@@ -6,11 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "bunx --bun wxt",
-    "dev:firefox": "bunx --bun wxt -b firefox",
     "build": "bunx --bun wxt build",
-    "build:firefox": "bunx --bun wxt build -b firefox",
     "zip": "bunx --bun wxt zip",
-    "zip:firefox": "bunx --bun wxt zip -b firefox",
     "compile": "tsc --noEmit",
     "postinstall": "bunx --bun wxt prepare"
   },
