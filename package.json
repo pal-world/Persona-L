@@ -1,0 +1,29 @@
+{
+  "name": "writer-ai",
+  "description": "manifest.json description",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bunx --bun wxt",
+    "dev:firefox": "bunx --bun wxt -b firefox",
+    "build": "bunx --bun wxt build",
+    "build:firefox": "bunx --bun wxt build -b firefox",
+    "zip": "bunx --bun wxt zip",
+    "zip:firefox": "bunx --bun wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "postinstall": "bunx --bun wxt prepare"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.280",
+    "@types/react": "^19.0.1",
+    "@types/react-dom": "^19.0.2",
+    "@wxt-dev/module-react": "^1.1.2",
+    "typescript": "^5.6.3",
+    "wxt": "^0.19.13"
+  }
+}
