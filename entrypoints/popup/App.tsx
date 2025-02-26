@@ -83,10 +83,12 @@ function App() {
     setIsLoading(true);
 
     try {
+      // 이전 대화 내용을 포함하여 API 호출
       const response = await chatWithPersona({
         prompt: message,
         pageContent,
         persona,
+        messages: messages, // 이전 대화 내용 전달
       });
 
       addMessage({ role: 'assistant', content: response });
