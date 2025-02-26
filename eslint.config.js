@@ -3,6 +3,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tseslintParser from '@typescript-eslint/parser';
 import reactPlugin from 'eslint-plugin-react';
 import reactHooksPlugin from 'eslint-plugin-react-hooks';
+import globals from 'globals';
 
 export default [
   eslint.configs.recommended,
@@ -10,7 +11,7 @@ export default [
     files: ['entrypoints/**/*.{js,jsx,ts,tsx}'],
     plugins: {
       '@typescript-eslint': tseslint,
-      'react': reactPlugin,
+      react: reactPlugin,
       'react-hooks': reactHooksPlugin,
     },
     languageOptions: {
@@ -19,17 +20,19 @@ export default [
         ecmaVersion: 'latest',
         sourceType: 'module',
         ecmaFeatures: {
-          jsx: true
-        }
+          jsx: true,
+        },
       },
       globals: {
+        ...globals.browser,
         console: 'readonly',
         document: 'readonly',
         window: 'readonly',
         browser: 'readonly',
+        chrome: 'readonly',
         defineContentScript: 'readonly',
-        defineBackground: 'readonly'
-      }
+        defineBackground: 'readonly',
+      },
     },
     settings: {
       react: {
@@ -44,4 +47,4 @@ export default [
       'react-hooks/exhaustive-deps': 'warn',
     },
   },
-]; 
+];

@@ -1,6 +1,6 @@
 export default defineContentScript({
-  matches: ['*://*.google.com/*'],
+  matches: ['<all_urls>'],
   main() {
-    console.log('Hello content.');
+    console.log('Persona-L 콘텐츠 스크립트가 로드되었습니다.');
   },
 });
