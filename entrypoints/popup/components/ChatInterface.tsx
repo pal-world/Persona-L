@@ -67,7 +67,7 @@ const ChatInput = React.memo(
           <button
             onClick={handleSendMessage}
             disabled={!input.trim() || isLoading}
-            className='chat-send-button btn-micro-interaction btn-glow-effect'
+            className='chat-send-button btn-glow-effect'
             aria-label='메시지 보내기'
           >
             {isLoading ? (

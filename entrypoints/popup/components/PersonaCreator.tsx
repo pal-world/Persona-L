@@ -8,7 +8,7 @@ interface PersonaCreatorProps {
 
 const PersonaCreator = ({ onCreatePersona, isLoading }: PersonaCreatorProps) => {
   return (
-    <div className='glass-card p-6 flex flex-col items-center interactive-card rounded-modern-lg animate-fade-in'>
+    <div className='glass-card p-6 flex flex-col items-center justify-center h-full rounded-modern-lg'>
       <div className='text-purple-600 mb-4 animate-float relative'>
         <div className='absolute inset-0 bg-purple-200 rounded-full blur-xl opacity-30 animate-pulse-slow'></div>
         <img src={chatIcon} alt='Chat Icon' width={100} height={100} className='relative z-10' />
@@ -23,7 +23,7 @@ const PersonaCreator = ({ onCreatePersona, isLoading }: PersonaCreatorProps) => 
       <button
         onClick={onCreatePersona}
         disabled={isLoading}
-        className='btn btn-primary btn-micro-interaction btn-glow-effect w-full py-2.5 rounded-modern animate-click disabled:bg-purple-400 disabled:shadow-none disabled:cursor-not-allowed relative overflow-hidden group'
+        className='btn btn-primary btn-glow-effect w-full py-2.5 rounded-modern animate-click disabled:bg-purple-400 disabled:shadow-none disabled:cursor-not-allowed relative overflow-hidden group'
       >
         {isLoading ? (
           <>

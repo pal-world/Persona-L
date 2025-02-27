@@ -152,7 +152,7 @@ function App() {
         </div>
         <button
           onClick={() => setShowSettings(true)}
-          className='btn-icon btn-micro-interaction btn-glow-effect hover:bg-purple-500 hover:bg-opacity-50 text-white hover:rotate-12 transition-transform rounded-modern'
+          className='btn-icon btn-glow-effect hover:bg-purple-500 hover:bg-opacity-50 text-white hover:rotate-12 transition-transform rounded-modern'
           title='API 키 설정'
         >
           <FaCog className='text-lg' />
@@ -167,14 +167,14 @@ function App() {
         )}
 
         {!apiKey && (
-          <div className='glass-card p-5 flex flex-col items-center interactive-card rounded-modern-lg animate-fade-in'>
+          <div className='glass-card p-5 flex flex-col items-center rounded-modern-lg animate-fade-in'>
             <h2 className='text-xl font-semibold text-gray-800 mb-3 tracking-tight'>API 키 설정</h2>
             <p className='text-gray-600 text-center mb-4 leading-relaxed'>
               Persona-L을 사용하기 위해 OpenAI API 키가 필요합니다
             </p>
             <button
               onClick={() => setShowSettings(true)}
-              className='btn btn-primary btn-micro-interaction btn-glow-effect w-full py-2.5 rounded-modern animate-click'
+              className='btn btn-primary btn-glow-effect w-full py-2.5 rounded-modern animate-click'
             >
               API 키 설정하기
             </button>
