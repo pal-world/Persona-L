@@ -6,17 +6,28 @@ export default {
       // 여기에 커스텀 테마 설정을 추가할 수 있습니다
       colors: {
         purple: {
-          50: '#f5f3ff',
-          100: '#ede9fe',
-          200: '#ddd6fe',
-          300: '#c4b5fd',
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
-          700: '#6d28d9',
-          800: '#5b21b6',
-          900: '#4c1d95',
-          950: '#2e1065',
+          50: '#F0E8FF', // 약간 더 진한 라벤더 회색
+          100: '#E5D8F0', // 더 진한 회색빛 보라
+          200: '#D0A6DE', // 더 진한 라일락
+          300: '#C090DC', // 더 진한 중간 톤의 라일락
+          400: '#AE7CBB', // 더 진한 자주빛
+          500: '#9470C4', // 더 진한 라벤더 보라 (메인 컬러)
+          600: '#8050A8', // 더 진한 프릳 보라
+          700: '#6E4090', // 더 진한 깊은 보라
+          800: '#5C3478', // 더 진한 어두운 보라
+          900: '#4A2860', // 더 진한 매우 어두운 보라
+          950: '#361848', // 더 진한 가장 어두운 보라
+        },
+        glass: {
+          100: 'rgba(255, 255, 255, 0.1)',
+          200: 'rgba(255, 255, 255, 0.2)',
+          300: 'rgba(255, 255, 255, 0.3)',
+          400: 'rgba(255, 255, 255, 0.4)',
+          500: 'rgba(255, 255, 255, 0.5)',
+          600: 'rgba(255, 255, 255, 0.6)',
+          700: 'rgba(255, 255, 255, 0.7)',
+          800: 'rgba(255, 255, 255, 0.8)',
+          900: 'rgba(255, 255, 255, 0.9)',
         },
       },
       fontFamily: {
@@ -44,9 +55,16 @@ export default {
         button: '0 2px 4px rgba(0, 0, 0, 0.1)',
         'button-hover': '0 4px 8px rgba(0, 0, 0, 0.15)',
         float: '0 6px 12px -2px rgba(0, 0, 0, 0.1)',
+        glass: '0 8px 32px 0 rgba(31, 38, 135, 0.15)',
+        'glass-sm': '0 4px 16px 0 rgba(31, 38, 135, 0.1)',
+        'glass-hover': '0 8px 32px 0 rgba(31, 38, 135, 0.25)',
+        'inner-glass': 'inset 0 0 8px 0 rgba(31, 38, 135, 0.1)',
       },
       borderRadius: {
         lg: '0.75rem',
+        xl: '1rem',
+        '2xl': '1.5rem',
+        '3xl': '2rem',
       },
       spacing: {
         4.5: '1.125rem',
@@ -55,10 +73,12 @@ export default {
         height: 'height',
         spacing: 'margin, padding',
         scale: 'transform',
+        blur: 'filter',
       },
       transitionDuration: {
         250: '250ms',
         400: '400ms',
+        600: '600ms',
       },
       transitionTimingFunction: {
         'bounce-sm': 'cubic-bezier(0.18, 1.25, 0.4, 1)',
@@ -68,6 +88,9 @@ export default {
         float: 'float 3s ease-in-out infinite',
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'bounce-sm': 'bounce-sm 0.5s cubic-bezier(0.18, 1.25, 0.4, 1)',
+        'spin-slow': 'spin 3s linear infinite',
+        shimmer: 'shimmer 2s linear infinite',
+        'fade-in': 'fade-in 0.5s ease-out',
       },
       keyframes: {
         float: {
@@ -78,10 +101,25 @@ export default {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-3px)' },
         },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
       },
       scale: {
         102: '1.02',
         103: '1.03',
+      },
+      backdropBlur: {
+        xs: '2px',
+        sm: '4px',
+        md: '8px',
+        lg: '12px',
+        xl: '16px',
       },
     },
   },

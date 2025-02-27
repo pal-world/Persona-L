@@ -13,7 +13,77 @@ interface ChatInterfaceProps {
   onSendMessage: (message: string) => void;
 }
 
-const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProps) => {
+// 메시지 아이템 컴포넌트를 메모이제이션하여 성능 최적화
+const MessageItem = React.memo(({ message }: { message: Message }) => (
+  <div className={`message-item ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+    <div className={`message-bubble ${message.role === 'user' ? 'message-bubble-user' : 'message-bubble-assistant'}`}>
+      {message.role === 'user' ? (
+        <p className='text-sm'>{message.content}</p>
+      ) : (
+        <MarkdownRenderer content={message.content} />
+      )}
+    </div>
+  </div>
+));
+
+// 입력 필드 컴포넌트를 메모이제이션하여 성능 최적화
+const ChatInput = React.memo(
+  ({
+    input,
+    setInput,
+    handleSendMessage,
+    isLoading,
+  }: {
+    input: string;
+    setInput: (value: string) => void;
+    handleSendMessage: () => void;
+    isLoading: boolean;
+  }) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setInput(e.target.value);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.shiftKey && input.trim()) {
+        e.preventDefault();
+        handleSendMessage();
+      }
+    };
+
+    return (
+      <div className='chat-input-group'>
+        <input
+          type='text'
+          value={input}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          placeholder='메시지를 입력하세요...'
+          disabled={isLoading}
+          className='chat-input'
+          autoComplete='off'
+          spellCheck='false'
+        />
+        <button
+          onClick={handleSendMessage}
+          disabled={!input.trim() || isLoading}
+          className='chat-send-button btn-micro-interaction btn-glow-effect'
+          aria-label='메시지 보내기'
+        >
+          {isLoading ? (
+            <FaSpinner className='animate-spin text-lg' />
+          ) : (
+            <div className='relative w-full h-full flex items-center justify-center'>
+              <FaPaperPlane className='text-lg transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300' />
+              <div className='absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-full scale-0 group-hover:scale-100 transition-all duration-300'></div>
+            </div>
+          )}
+        </button>
+      </div>
+    );
+  },
+);
+
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, isLoading }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -21,8 +91,7 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSendMessage = () => {
     if (input.trim() && !isLoading) {
       onSendMessage(input);
       setInput('');
@@ -30,66 +99,16 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
   };
 
   return (
-    <div className='flex-1 flex flex-col h-full bg-white rounded-lg shadow-card overflow-hidden font-sans'>
-      <div className='flex-1 overflow-y-auto p-4.5'>
+    <div className='flex flex-col h-full glass-card rounded-modern-lg overflow-hidden'>
+      <div className='flex-1 overflow-y-auto p-4 space-y-4 bg-white'>
         {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`mb-4 ${message.role === 'user' ? 'ml-auto max-w-[80%]' : 'mr-auto max-w-[80%]'}`}
-          >
-            <div
-              className={`p-3 rounded-lg transform transition-all duration-250 ${
-                message.role === 'user'
-                  ? 'bg-purple-600 text-white rounded-br-none font-medium shadow-button'
-                  : 'bg-purple-50 text-gray-800 rounded-bl-none shadow-button hover:shadow-button-hover hover:scale-102'
-              }`}
-            >
-              {message.role === 'user' ? (
-                <p className='leading-relaxed tracking-wide'>{message.content}</p>
-              ) : (
-                <div className='prose prose-sm max-w-none leading-relaxed'>
-                  <MarkdownRenderer content={message.content} />
-                </div>
-              )}
-            </div>
-          </div>
+          <MessageItem key={index} message={message} />
         ))}
-
-        {isLoading && (
-          <div className='mr-auto max-w-[80%] mb-4'>
-            <div className='p-3 bg-purple-50 text-gray-800 rounded-lg rounded-bl-none flex items-center shadow-button animate-pulse-slow'>
-              <FaSpinner className='animate-spin mr-2 text-purple-600' />
-              <span className='font-medium'>생각 중...</span>
-            </div>
-          </div>
-        )}
-
         <div ref={messagesEndRef} />
       </div>
-
-      <form onSubmit={handleSubmit} className='p-4.5 border-t border-gray-200 bg-gray-50'>
-        <div className='flex group'>
-          <input
-            type='text'
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder='작가에게 메시지 보내기...'
-            className='input-field flex-1 p-3 rounded-l-lg font-sans animate-focus'
-            disabled={isLoading}
-          />
-          <button
-            type='submit'
-            disabled={isLoading || !input.trim()}
-            className='btn btn-primary p-3 rounded-r-lg animate-click disabled:bg-purple-400 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center w-12'
-          >
-            {isLoading ? (
-              <FaSpinner className='animate-spin' />
-            ) : (
-              <FaPaperPlane className='transform transition-transform duration-250 group-hover:translate-x-1 group-hover:-translate-y-1' />
-            )}
-          </button>
-        </div>
-      </form>
+      <div className='p-4 border-t border-purple-300/50 bg-white bg-opacity-70 backdrop-blur-sm'>
+        <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading} />
+      </div>
     </div>
   );
 };

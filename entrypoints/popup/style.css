@@ -3,6 +3,10 @@
 @tailwind utilities;
 
 @layer base {
+  * {
+    box-sizing: border-box;
+  }
+
   html {
     font-family: 'Poppins', 'Roboto', 'Open Sans', system-ui, sans-serif;
   }
@@ -34,16 +38,82 @@
 }
 
 @layer components {
+  /* 헤더 스타일 */
+  .app-header {
+    @apply bg-gradient-to-r from-purple-700 to-purple-600 text-white p-4 shadow-md flex justify-between items-center rounded-b-xl;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .app-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 50%);
+    pointer-events: none;
+  }
+
+  .app-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  }
+
+  .app-header h1 {
+    @apply text-2xl font-bold tracking-tight text-white;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    letter-spacing: 0.5px;
+  }
+
+  .app-header p {
+    @apply text-sm font-light tracking-wide opacity-90;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  }
+
   .btn {
     @apply relative inline-flex items-center justify-center font-medium transition-all duration-250 ease-in-out;
   }
 
   .btn-primary {
-    @apply bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 shadow-button hover:shadow-button-hover;
+    @apply bg-gradient-to-r from-purple-600 to-purple-700 text-white;
+    box-shadow:
+      0 4px 6px -1px rgba(110, 64, 144, 0.2),
+      0 2px 4px -1px rgba(110, 64, 144, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.25s ease;
+  }
+
+  .btn-primary:hover {
+    @apply from-purple-700 to-purple-800;
+    box-shadow:
+      0 6px 12px -2px rgba(110, 64, 144, 0.25),
+      0 3px 7px -3px rgba(110, 64, 144, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    @apply from-purple-800 to-purple-700;
+    box-shadow:
+      0 2px 5px -1px rgba(110, 64, 144, 0.2),
+      0 1px 3px -1px rgba(110, 64, 144, 0.1),
+      inset 0 1px 1px rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400 shadow-button hover:shadow-button-hover;
+    @apply bg-purple-200 text-gray-800 hover:bg-purple-300 active:bg-purple-400 shadow-button hover:shadow-button-hover;
   }
 
   .btn-icon {
@@ -55,7 +125,46 @@
   }
 
   .input-field {
-    @apply transition-all duration-250 ease-in-out border border-gray-300 focus:border-purple-400 focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 focus:outline-none;
+    @apply transition-all duration-250 ease-in-out border border-purple-300 focus:border-purple-600 focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:outline-none;
+  }
+
+  .glass {
+    @apply bg-glass-500 backdrop-blur-md bg-opacity-70 border border-glass-600 shadow-glass;
+    background: linear-gradient(135deg, rgba(208, 166, 222, 0.3), rgba(148, 112, 196, 0.2));
+    border-color: rgba(208, 166, 222, 0.4);
+  }
+
+  .glass-card {
+    @apply bg-white bg-opacity-80 backdrop-blur-sm border border-glass-300 shadow-glass-sm;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(240, 232, 255, 0.85));
+    border-color: rgba(208, 166, 222, 0.3);
+  }
+
+  .glass-dark {
+    @apply bg-gray-900 bg-opacity-70 backdrop-blur-md border border-gray-800 shadow-glass;
+    background: linear-gradient(135deg, rgba(92, 52, 120, 0.8), rgba(54, 24, 72, 0.9));
+    border-color: rgba(128, 80, 168, 0.4);
+  }
+
+  .shimmer {
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-glass-200 before:to-transparent;
+  }
+
+  .loading-dots:after {
+    content: '.';
+    animation: loading-dots 1.5s infinite;
+  }
+
+  @keyframes loading-dots {
+    0% {
+      content: '.';
+    }
+    33% {
+      content: '..';
+    }
+    66% {
+      content: '...';
+    }
   }
 }
 
@@ -70,5 +179,235 @@
 
   .animate-focus {
     @apply focus:scale-102 transition-transform duration-250;
+  }
+
+  /* 버튼 마이크로 인터랙션 */
+  .btn-micro-interaction {
+    position: relative;
+    transform: scale(1);
+    box-shadow: 0 4px 10px rgba(110, 64, 144, 0.2);
+    transition:
+      transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.25s ease-out,
+      background-color 0.25s ease-out;
+    overflow: hidden;
+    z-index: 1;
+  }
+
+  .btn-micro-interaction:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 16px rgba(110, 64, 144, 0.25);
+  }
+
+  .btn-micro-interaction:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(110, 64, 144, 0.15);
+    transition:
+      transform 0.1s ease-out,
+      box-shadow 0.1s ease-out;
+  }
+
+  .btn-micro-interaction::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    opacity: 0;
+    transition: opacity 0.25s ease-out;
+    pointer-events: none;
+  }
+
+  .btn-micro-interaction:hover::after {
+    opacity: 1;
+  }
+
+  /* 보라색 글로우 효과 */
+  .btn-glow-effect {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+  }
+
+  .btn-glow-effect::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(208, 166, 222, 0.4), rgba(148, 112, 196, 0.2), rgba(110, 64, 144, 0.4));
+    background-size: 200% 200%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease-out;
+    border-radius: inherit;
+  }
+
+  .btn-glow-effect:hover::before {
+    opacity: 1;
+    animation: shimmer-background 2s ease-in-out infinite alternate;
+  }
+
+  .btn-glow-effect::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    right: 1px;
+    bottom: 1px;
+    background: inherit;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.2s ease-out;
+  }
+
+  @keyframes shimmer-background {
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: 100% 100%;
+    }
+  }
+
+  @keyframes shimmer-loading {
+    0% {
+      background-position: -200% center;
+    }
+    100% {
+      background-position: 200% center;
+    }
+  }
+
+  .shimmer-loading {
+    animation: shimmer-loading 2s linear infinite;
+    background-size: 200% 100%;
+    background-image: linear-gradient(
+      90deg,
+      rgba(148, 112, 196, 0.9) 0%,
+      rgba(168, 130, 218, 0.9) 25%,
+      rgba(188, 148, 230, 0.9) 50%,
+      rgba(168, 130, 218, 0.9) 75%,
+      rgba(148, 112, 196, 0.9) 100%
+    );
+  }
+
+  .rounded-modern {
+    @apply rounded-xl;
+  }
+
+  .rounded-modern-lg {
+    @apply rounded-2xl;
+  }
+
+  .rounded-modern-full {
+    @apply rounded-3xl;
+  }
+
+  /* 방향별 둥근 모서리 */
+  .rounded-l-modern {
+    @apply rounded-l-xl;
+  }
+
+  .rounded-r-modern {
+    @apply rounded-r-xl;
+  }
+
+  .rounded-t-modern {
+    @apply rounded-t-xl;
+  }
+
+  .rounded-b-modern {
+    @apply rounded-b-xl;
+  }
+
+  /* 채팅 인터페이스 스타일 최적화 */
+  .chat-input-group {
+    @apply flex w-full items-stretch gap-0;
+    contain: layout style;
+    isolation: isolate;
+    height: 42px;
+  }
+
+  .chat-input {
+    @apply flex-1 px-4 py-2 border-2 border-purple-100 rounded-l-lg bg-white bg-opacity-80;
+    @apply focus:outline-none focus:border-purple-600 focus:bg-opacity-100;
+    @apply placeholder-gray-400;
+    @apply h-full;
+    box-sizing: border-box !important;
+    contain: content;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-font-smoothing: subpixel-antialiased;
+    transition-property: border-color, background-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+  }
+
+  .chat-input:focus {
+    border-color: #8050a8 !important;
+  }
+
+  .chat-send-button {
+    @apply px-4 py-2 bg-purple-600 text-white rounded-r-lg border-2 border-purple-600;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply hover:bg-purple-700 hover:border-purple-700 active:scale-95;
+    @apply flex items-center justify-center min-w-[48px] h-full;
+    box-sizing: border-box !important;
+    contain: content;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    transition-property: background-color, border-color, transform, opacity;
+    transition-duration: 0.2s;
+    transition-timing-function: ease-out;
+  }
+
+  /* 메시지 아이템 스타일 */
+  .message-item {
+    @apply mb-4 transition-opacity duration-300 ease-in-out;
+    opacity: 0;
+    animation: fadeIn 0.3s forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .message-bubble {
+    @apply inline-block p-3 rounded-modern-lg transition-all duration-300 max-w-[85%];
+    contain: content;
+    transform: translateZ(0);
+  }
+
+  .message-bubble-user {
+    @apply bg-purple-200 text-gray-800 rounded-br-none shadow-sm;
+  }
+
+  .message-bubble-assistant {
+    @apply glass-card rounded-bl-none shadow-sm;
+    background: linear-gradient(135deg, rgba(208, 166, 222, 0.3), rgba(148, 112, 196, 0.2));
+    border-color: rgba(208, 166, 222, 0.4);
+  }
+
+  @keyframes pulse-slow {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }

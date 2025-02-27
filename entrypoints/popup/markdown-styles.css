@@ -19,6 +19,26 @@
   font-weight: 600;
   letter-spacing: -0.025em;
   color: #111827;
+  position: relative;
+  padding-bottom: 0.3em;
+}
+
+.markdown-content h1::after,
+.markdown-content h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 2rem;
+  height: 2px;
+  background: linear-gradient(90deg, #8b5cf6, transparent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.markdown-content h1:hover::after,
+.markdown-content h2:hover::after {
+  width: 100%;
 }
 
 .markdown-content h1 {
@@ -68,44 +88,78 @@
 .markdown-content li {
   margin-bottom: 0.5em;
   line-height: 1.6;
+  position: relative;
+}
+
+.markdown-content li::marker {
+  color: #8b5cf6;
 }
 
 .markdown-content a {
   color: #7c3aed;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
   font-weight: 500;
-  transition: color 0.2s;
+  transition: all 0.25s;
+  position: relative;
+  display: inline-block;
+}
+
+.markdown-content a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 1px;
+  bottom: 0;
+  left: 0;
+  background-color: #7c3aed;
+  transition: width 0.3s ease;
 }
 
 .markdown-content a:hover {
   color: #6d28d9;
 }
 
+.markdown-content a:hover::after {
+  width: 100%;
+}
+
 .markdown-content blockquote {
-  border-left: 4px solid #e2e8f0;
-  padding-left: 1em;
+  border-left: 4px solid #c4b5fd;
+  padding: 0.8em 1em;
   margin-left: 0;
   margin-bottom: 1em;
   color: #4b5563;
   font-style: italic;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  border-radius: 0 0.75rem 0.75rem 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
 }
 
 .markdown-content pre {
-  background-color: #f9fafb;
-  border-radius: 0.375rem;
+  background-color: rgba(31, 41, 55, 0.95);
+  border-radius: 0.75rem;
   padding: 1em;
   overflow-x: auto;
   margin-bottom: 1em;
   font-size: 0.9em;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .markdown-content code {
-  background-color: #f3f4f6;
-  border-radius: 0.25rem;
+  background-color: rgba(243, 244, 246, 0.7);
+  backdrop-filter: blur(4px);
+  border-radius: 0.375rem;
   padding: 0.2em 0.4em;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 0.9em;
+  transition: background-color 0.25s;
+}
+
+.markdown-content code:hover {
+  background-color: rgba(243, 244, 246, 0.9);
 }
 
 .markdown-content pre code {
@@ -113,34 +167,70 @@
   padding: 0;
   font-size: 0.95em;
   line-height: 1.6;
+  color: #e5e7eb;
 }
 
 .markdown-content table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-bottom: 1em;
   font-size: 0.95em;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .markdown-content th,
 .markdown-content td {
   border: 1px solid #e5e7eb;
-  padding: 0.625em;
+  padding: 0.75em;
 }
 
 .markdown-content th {
-  background-color: #f9fafb;
+  background-color: rgba(249, 250, 251, 0.8);
+  backdrop-filter: blur(4px);
   font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.8em;
+  letter-spacing: 0.05em;
+}
+
+.markdown-content tr:hover {
+  background-color: rgba(249, 250, 251, 0.5);
 }
 
 .markdown-content img {
   max-width: 100%;
   height: auto;
-  border-radius: 0.375rem;
+  border-radius: 0.75rem;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.markdown-content img:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .markdown-content hr {
   border: 0;
-  border-top: 1px solid #e5e7eb;
-  margin: 1.5em 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.5), transparent);
+  margin: 2em 0;
+  position: relative;
+}
+
+.markdown-content hr::before {
+  content: '•';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #8b5cf6;
+  background-color: white;
+  padding: 0 10px;
+  font-size: 0.8em;
 }
