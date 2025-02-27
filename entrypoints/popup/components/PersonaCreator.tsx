@@ -8,27 +8,24 @@ interface PersonaCreatorProps {
 
 const PersonaCreator = ({ onCreatePersona, isLoading }: PersonaCreatorProps) => {
   return (
-    <div className='flex-1 flex flex-col items-center justify-center p-6 text-center'>
-      <div className='text-purple-600'>
-        <img src={chatIcon} alt='Chat Icon' width={120} height={120} />
+    <div className='bg-white rounded-lg shadow-card p-6 flex flex-col items-center hover:shadow-card-hover transition-shadow'>
+      <div className='text-purple-600 mb-4'>
+        <img src={chatIcon} alt='Chat Icon' width={100} height={100} />
       </div>
 
-      <h2 className='text-2xl font-bold text-gray-800 mb-4'>작가의 페르소나 생성하기</h2>
+      <h2 className='text-xl font-bold text-gray-800 mb-3'>페르소나 생성</h2>
 
-      <p className='text-gray-600 mb-8 max-w-xs'>
-        현재 페이지의 내용을 분석하여 글을 작성한 작가의 페르소나를 생성합니다. 생성된 페르소나와 대화를 나눌 수
-        있습니다.
-      </p>
+      <p className='text-gray-600 mb-5 text-center'>현재 페이지의 내용을 분석하여 작가의 페르소나를 생성합니다.</p>
 
       <button
         onClick={onCreatePersona}
         disabled={isLoading}
-        className='px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-purple-400 flex items-center'
+        className='w-full py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-purple-400 flex items-center justify-center'
       >
         {isLoading ? (
           <>
             <FaSpinner className='animate-spin mr-2' />
-            페르소나 생성 중...
+            생성 중...
           </>
         ) : (
           '페르소나 생성하기'

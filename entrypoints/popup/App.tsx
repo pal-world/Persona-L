@@ -115,17 +115,21 @@ function App() {
         </button>
       </header>
 
-      <main className='flex-1 overflow-hidden flex flex-col'>
+      <main className='flex-1 overflow-auto p-4.5 flex flex-col gap-4.5'>
         {error && (
-          <div className='bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-2'>
+          <div className='bg-white rounded-lg shadow-card border-l-4 border-red-500 text-red-700 p-4'>
             <p>{error}</p>
           </div>
         )}
 
         {!apiKey && (
-          <div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 m-2'>
-            <p>API 키를 설정해주세요.</p>
-            <button onClick={() => setShowSettings(true)} className='mt-2 text-purple-600 hover:underline'>
+          <div className='bg-white rounded-lg shadow-card p-5 flex flex-col items-center hover:shadow-card-hover transition-shadow'>
+            <h2 className='text-lg font-semibold text-gray-800 mb-3'>API 키 설정</h2>
+            <p className='text-gray-600 text-center mb-4'>Persona-L을 사용하기 위해 OpenAI API 키가 필요합니다</p>
+            <button
+              onClick={() => setShowSettings(true)}
+              className='w-full py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors'
+            >
               API 키 설정하기
             </button>
           </div>

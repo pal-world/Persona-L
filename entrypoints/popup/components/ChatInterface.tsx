@@ -30,8 +30,8 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
   };
 
   return (
-    <div className='flex-1 flex flex-col h-full'>
-      <div className='flex-1 overflow-y-auto p-4'>
+    <div className='flex-1 flex flex-col h-full bg-white rounded-lg shadow-card overflow-hidden'>
+      <div className='flex-1 overflow-y-auto p-4.5'>
         {messages.map((message, index) => (
           <div
             key={index}
@@ -41,7 +41,7 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
               className={`p-3 rounded-lg ${
                 message.role === 'user'
                   ? 'bg-purple-600 text-white rounded-br-none'
-                  : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                  : 'bg-purple-50 text-gray-800 rounded-bl-none'
               }`}
             >
               {message.role === 'user' ? message.content : <MarkdownRenderer content={message.content} />}
@@ -51,8 +51,8 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
 
         {isLoading && (
           <div className='mr-auto max-w-[80%] mb-4'>
-            <div className='p-3 bg-gray-200 text-gray-800 rounded-lg rounded-bl-none flex items-center'>
-              <FaSpinner className='animate-spin mr-2' />
+            <div className='p-3 bg-purple-50 text-gray-800 rounded-lg rounded-bl-none flex items-center'>
+              <FaSpinner className='animate-spin mr-2 text-purple-600' />
               생각 중...
             </div>
           </div>
@@ -61,20 +61,20 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSubmit} className='p-4 border-t border-gray-200'>
+      <form onSubmit={handleSubmit} className='p-4.5 border-t border-gray-200 bg-gray-50'>
         <div className='flex'>
           <input
             type='text'
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder='작가에게 메시지 보내기...'
-            className='flex-1 p-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500'
+            className='flex-1 p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-purple-500'
             disabled={isLoading}
           />
           <button
             type='submit'
             disabled={isLoading || !input.trim()}
-            className='bg-purple-600 text-white p-2 rounded-r-lg hover:bg-purple-700 disabled:bg-purple-400'
+            className='bg-purple-600 text-white p-3 rounded-r-lg hover:bg-purple-700 disabled:bg-purple-400 flex items-center justify-center w-12'
           >
             {isLoading ? <FaSpinner className='animate-spin' /> : <FaPaperPlane />}
           </button>
