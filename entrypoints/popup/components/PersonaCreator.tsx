@@ -8,27 +8,29 @@ interface PersonaCreatorProps {
 
 const PersonaCreator = ({ onCreatePersona, isLoading }: PersonaCreatorProps) => {
   return (
-    <div className='bg-white rounded-lg shadow-card p-6 flex flex-col items-center hover:shadow-card-hover transition-shadow'>
-      <div className='text-purple-600 mb-4'>
+    <div className='bg-white rounded-lg shadow-card p-6 flex flex-col items-center interactive-card'>
+      <div className='text-purple-600 mb-4 animate-float'>
         <img src={chatIcon} alt='Chat Icon' width={100} height={100} />
       </div>
 
-      <h2 className='text-xl font-bold text-gray-800 mb-3'>페르소나 생성</h2>
+      <h2 className='text-xl font-bold text-gray-800 mb-3 tracking-tight'>페르소나 생성</h2>
 
-      <p className='text-gray-600 mb-5 text-center'>현재 페이지의 내용을 분석하여 작가의 페르소나를 생성합니다.</p>
+      <p className='text-gray-600 mb-5 text-center leading-relaxed'>
+        현재 페이지의 내용을 분석하여 작가의 페르소나를 생성합니다.
+      </p>
 
       <button
         onClick={onCreatePersona}
         disabled={isLoading}
-        className='w-full py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-purple-400 flex items-center justify-center'
+        className='btn btn-primary w-full py-2.5 rounded-lg animate-click disabled:bg-purple-400 disabled:shadow-none disabled:cursor-not-allowed'
       >
         {isLoading ? (
           <>
             <FaSpinner className='animate-spin mr-2' />
-            생성 중...
+            <span className='tracking-wide'>생성 중...</span>
           </>
         ) : (
-          '페르소나 생성하기'
+          <span className='tracking-wide'>페르소나 생성하기</span>
         )}
       </button>
     </div>

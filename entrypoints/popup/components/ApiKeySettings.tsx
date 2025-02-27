@@ -30,28 +30,31 @@ const ApiKeySettings = ({ onClose }: ApiKeySettingsProps) => {
   };
 
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
-      <div className='bg-white rounded-lg shadow-card p-6 w-[90%] max-w-md'>
+    <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm transition-all duration-300'>
+      <div className='bg-white rounded-lg shadow-card p-6 w-[90%] max-w-md font-sans animate-bounce-sm'>
         <div className='flex justify-between items-center mb-5'>
-          <h2 className='text-xl font-bold text-gray-800'>API 키 설정</h2>
-          <button onClick={onClose} className='text-gray-500 hover:text-gray-700'>
+          <h2 className='text-xl font-bold text-gray-800 tracking-tight'>API 키 설정</h2>
+          <button
+            onClick={onClose}
+            className='btn-icon text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full animate-click'
+          >
             <FaTimes />
           </button>
         </div>
 
         {error && (
-          <div className='bg-red-50 border-l-4 border-red-500 text-red-700 p-3 mb-5 rounded'>
-            <p>{error}</p>
+          <div className='bg-red-50 border-l-4 border-red-500 text-red-700 p-3 mb-5 rounded animate-bounce-sm'>
+            <p className='font-medium'>{error}</p>
           </div>
         )}
 
         <div className='mb-5'>
-          <p className='text-gray-600 mb-3'>OpenAI API 키를 입력하세요. 키는 로컬에만 저장됩니다.</p>
+          <p className='text-gray-600 mb-3 leading-relaxed'>OpenAI API 키를 입력하세요. 키는 로컬에만 저장됩니다.</p>
           <a
             href='https://platform.openai.com/api-keys'
             target='_blank'
             rel='noopener noreferrer'
-            className='text-purple-600 hover:underline text-sm'
+            className='text-purple-600 hover:text-purple-800 hover:underline text-sm font-medium transition-colors duration-250 animate-hover-float inline-block'
           >
             API 키 발급받기
           </a>
@@ -67,10 +70,10 @@ const ApiKeySettings = ({ onClose }: ApiKeySettingsProps) => {
               value={inputKey}
               onChange={(e) => setInputKey(e.target.value)}
               placeholder='sk-...'
-              className='w-full pl-10 p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500'
+              className='input-field w-full pl-10 p-3 rounded-lg font-mono text-sm animate-focus'
             />
             {isKeyValid && (
-              <div className='absolute inset-y-0 right-0 flex items-center pr-3 text-green-500'>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-3 text-green-500 animate-pulse-slow'>
                 <FaCheck />
               </div>
             )}
@@ -81,7 +84,7 @@ const ApiKeySettings = ({ onClose }: ApiKeySettingsProps) => {
           <button
             onClick={handleClearKey}
             disabled={isLoading || !apiKey}
-            className='flex-1 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors disabled:bg-gray-100 disabled:text-gray-400'
+            className='btn btn-secondary flex-1 py-2.5 rounded-lg animate-click disabled:bg-gray-100 disabled:text-gray-400 disabled:shadow-none disabled:cursor-not-allowed'
           >
             키 삭제
           </button>
@@ -89,7 +92,7 @@ const ApiKeySettings = ({ onClose }: ApiKeySettingsProps) => {
           <button
             onClick={handleSaveKey}
             disabled={isLoading || inputKey === apiKey}
-            className='flex-1 py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-purple-400 flex items-center justify-center'
+            className='btn btn-primary flex-1 py-2.5 rounded-lg animate-click disabled:bg-purple-400 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center'
           >
             {isLoading ? (
               <>

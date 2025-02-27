@@ -1,3 +1,74 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities; 
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Poppins', 'Roboto', 'Open Sans', system-ui, sans-serif;
+  }
+
+  body {
+    @apply text-base text-gray-800 antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-semibold tracking-tight text-gray-900;
+  }
+
+  h1 {
+    @apply text-2xl;
+  }
+
+  h2 {
+    @apply text-xl;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply relative inline-flex items-center justify-center font-medium transition-all duration-250 ease-in-out;
+  }
+
+  .btn-primary {
+    @apply bg-purple-600 text-white hover:bg-purple-700 active:bg-purple-800 shadow-button hover:shadow-button-hover;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 active:bg-gray-400 shadow-button hover:shadow-button-hover;
+  }
+
+  .btn-icon {
+    @apply p-2 rounded-full transition-colors duration-250 ease-in-out;
+  }
+
+  .interactive-card {
+    @apply transition-all duration-250 ease-in-out transform hover:scale-102 hover:shadow-float;
+  }
+
+  .input-field {
+    @apply transition-all duration-250 ease-in-out border border-gray-300 focus:border-purple-400 focus:ring-2 focus:ring-purple-300 focus:ring-opacity-50 focus:outline-none;
+  }
+}
+
+@layer utilities {
+  .animate-hover-float {
+    @apply hover:translate-y-[-2px] transition-transform duration-250 ease-in-out;
+  }
+
+  .animate-click {
+    @apply active:scale-95 transition-transform duration-150;
+  }
+
+  .animate-focus {
+    @apply focus:scale-102 transition-transform duration-250;
+  }
+}

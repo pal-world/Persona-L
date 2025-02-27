@@ -100,35 +100,37 @@ function App() {
   };
 
   return (
-    <div className='min-h-screen flex flex-col bg-gray-100 w-[400px] h-[600px]'>
+    <div className='min-h-screen flex flex-col bg-gray-100 w-[400px] h-[600px] font-sans'>
       <header className='bg-purple-600 text-white p-4 shadow-md flex justify-between items-center'>
         <div>
-          <h1 className='text-xl font-bold'>Persona-L</h1>
-          <p className='text-sm opacity-80'>작가의 마음으로 글을 이해하세요</p>
+          <h1 className='text-2xl font-bold tracking-tight text-white shadow-text'>Persona-L</h1>
+          <p className='text-sm font-light tracking-wide opacity-90'>작가의 마음으로 글을 이해하세요</p>
         </div>
         <button
           onClick={() => setShowSettings(true)}
-          className='p-2 rounded-full hover:bg-purple-700 transition-colors'
+          className='btn-icon hover:bg-purple-700 text-white hover:rotate-12 transition-transform'
           title='API 키 설정'
         >
-          <FaCog />
+          <FaCog className='text-lg' />
         </button>
       </header>
 
       <main className='flex-1 overflow-auto p-4.5 flex flex-col gap-4.5'>
         {error && (
-          <div className='bg-white rounded-lg shadow-card border-l-4 border-red-500 text-red-700 p-4'>
-            <p>{error}</p>
+          <div className='bg-white rounded-lg shadow-card border-l-4 border-red-500 text-red-700 p-4 animate-bounce-sm'>
+            <p className='font-medium'>{error}</p>
           </div>
         )}
 
         {!apiKey && (
-          <div className='bg-white rounded-lg shadow-card p-5 flex flex-col items-center hover:shadow-card-hover transition-shadow'>
-            <h2 className='text-lg font-semibold text-gray-800 mb-3'>API 키 설정</h2>
-            <p className='text-gray-600 text-center mb-4'>Persona-L을 사용하기 위해 OpenAI API 키가 필요합니다</p>
+          <div className='bg-white rounded-lg shadow-card p-5 flex flex-col items-center interactive-card'>
+            <h2 className='text-xl font-semibold text-gray-800 mb-3 tracking-tight'>API 키 설정</h2>
+            <p className='text-gray-600 text-center mb-4 leading-relaxed'>
+              Persona-L을 사용하기 위해 OpenAI API 키가 필요합니다
+            </p>
             <button
               onClick={() => setShowSettings(true)}
-              className='w-full py-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors'
+              className='btn btn-primary w-full py-2.5 rounded-lg animate-click'
             >
               API 키 설정하기
             </button>
