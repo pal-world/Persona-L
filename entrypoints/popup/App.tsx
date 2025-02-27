@@ -15,6 +15,7 @@ function App() {
     usePersonaStore();
   const { apiKey, isInitialized } = useApiKeyStore();
   const [pageContent, setPageContent] = useState<string>('');
+  const [currentUrl, setCurrentUrl] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
   const [showChatHistory, setShowChatHistory] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
@@ -25,6 +26,17 @@ function App() {
     const initialize = async () => {
       setIsInitializing(true);
       await initializeApiKey();
+
+      // 현재 활성 탭의 URL 가져오기
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        if (tab && tab.url) {
+          setCurrentUrl(tab.url);
+        }
+      } catch (err) {
+        console.error('URL 가져오기 오류:', err);
+      }
+
       setIsInitializing(false);
     };
 
@@ -65,6 +77,11 @@ function App() {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (tab.id) {
+        // 현재 탭의 URL 저장
+        if (tab.url) {
+          setCurrentUrl(tab.url);
+        }
+
         const content = await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: extractPageContent,
@@ -221,7 +238,12 @@ function App() {
 
       {showSettings && <ApiKeySettings onClose={handleCloseSettings} />}
       {showChatHistory && (
-        <ChatHistory messages={messages} onClose={handleCloseChatHistory} onClearHistory={handleEndChat} />
+        <ChatHistory
+          messages={messages}
+          onClose={handleCloseChatHistory}
+          onClearHistory={handleEndChat}
+          currentUrl={currentUrl}
+        />
       )}
     </div>
   );

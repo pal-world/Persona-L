@@ -4,11 +4,11 @@ import {
   FaSearch,
   FaTrash,
   FaCalendarAlt,
-  FaChevronDown,
-  FaChevronUp,
+  FaChevronRight,
   FaUser,
   FaBook,
   FaClock,
+  FaGlobe,
 } from 'react-icons/fa';
 import MarkdownRenderer from './MarkdownRenderer';
 
@@ -21,20 +21,39 @@ interface ChatHistoryProps {
   messages: Message[];
   onClose: () => void;
   onClearHistory: () => void;
+  currentUrl?: string; // 현재 페이지 URL
 }
 
 // 대화 그룹 인터페이스 정의
 interface ConversationGroup {
   id: number;
   title: string;
+  url: string; // 사이트 URL
   messages: Message[];
   timestamp: Date;
 }
 
-const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHistory }) => {
+const ChatHistory: React.FC<ChatHistoryProps> = ({
+  messages,
+  onClose,
+  onClearHistory,
+  currentUrl = '알 수 없는 페이지',
+}) => {
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isSearchFocused, setIsSearchFocused] = React.useState(false);
-  const [expandedGroupId, setExpandedGroupId] = React.useState<number | null>(null);
+  const [selectedGroupId, setSelectedGroupId] = React.useState<number | null>(null);
+
+  // URL 형식 가공 함수
+  const formatUrl = (url: string): string => {
+    try {
+      const urlObj = new URL(url);
+      // 도메인 이름만 추출 (www. 제거)
+      return urlObj.hostname.replace(/^www\./, '');
+    } catch (e) {
+      // URL 파싱에 실패한 경우 원본 반환
+      return url;
+    }
+  };
 
   // 메시지를 대화 그룹으로 변환
   const conversationGroups = React.useMemo(() => {
@@ -57,14 +76,12 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHis
       if (message.role === 'user') {
         // 이전 그룹이 있으면 저장
         if (currentGroup.length > 0) {
-          const title =
-            currentGroup[0].role === 'user'
-              ? currentGroup[0].content.substring(0, 30) + (currentGroup[0].content.length > 30 ? '...' : '')
-              : `대화 ${groupId + 1}`;
+          const title = formatUrl(currentUrl);
 
           groups.push({
             id: groupId++,
             title,
+            url: currentUrl,
             messages: [...currentGroup],
             timestamp: new Date(),
           });
@@ -87,14 +104,12 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHis
 
     // 마지막 그룹 처리
     if (currentGroup.length > 0) {
-      const title =
-        currentGroup[0].role === 'user'
-          ? currentGroup[0].content.substring(0, 30) + (currentGroup[0].content.length > 30 ? '...' : '')
-          : `대화 ${groupId + 1}`;
+      const title = formatUrl(currentUrl);
 
       groups.push({
         id: groupId,
         title,
+        url: currentUrl,
         messages: [...currentGroup],
         timestamp: new Date(),
       });
@@ -102,20 +117,33 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHis
 
     // 최신 대화가 상단에 오도록 정렬
     return groups.reverse();
-  }, [messages]);
+  }, [messages, currentUrl]);
 
   // 검색어에 따라 대화 그룹 필터링
   const filteredGroups = React.useMemo(() => {
     if (!searchTerm.trim()) return conversationGroups;
 
-    return conversationGroups.filter((group) =>
-      group.messages.some((message) => message.content.toLowerCase().includes(searchTerm.toLowerCase())),
+    return conversationGroups.filter(
+      (group) =>
+        group.messages.some((message) => message.content.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        group.url.toLowerCase().includes(searchTerm.toLowerCase()),
     );
   }, [conversationGroups, searchTerm]);
 
-  // 그룹 확장/축소 토글
-  const toggleGroup = (groupId: number) => {
-    setExpandedGroupId(expandedGroupId === groupId ? null : groupId);
+  // 선택된 그룹 찾기
+  const selectedGroup = React.useMemo(() => {
+    if (selectedGroupId === null) return null;
+    return conversationGroups.find((group) => group.id === selectedGroupId) || null;
+  }, [conversationGroups, selectedGroupId]);
+
+  // 그룹 선택 핸들러
+  const handleSelectGroup = (groupId: number) => {
+    setSelectedGroupId(groupId);
+  };
+
+  // 대화 상세 화면에서 뒤로가기
+  const handleBackToList = () => {
+    setSelectedGroupId(null);
   };
 
   // 날짜 포맷팅 함수
@@ -160,7 +188,8 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHis
     </div>
   );
 
-  return (
+  // 대화 목록 화면
+  const ConversationListView = () => (
     <div className='fixed inset-0 bg-white z-50 flex flex-col animate-slide-up'>
       <header className='p-4 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm'>
         <div className='flex items-center'>
@@ -212,15 +241,11 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHis
               <li key={group.id} className='bg-white'>
                 <div
                   className='flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors'
-                  onClick={() => toggleGroup(group.id)}
+                  onClick={() => handleSelectGroup(group.id)}
                 >
                   <div className='flex items-center flex-1 min-w-0'>
                     <div className='w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3 flex-shrink-0'>
-                      {group.messages[0].role === 'user' ? (
-                        <FaUser className='text-purple-600' />
-                      ) : (
-                        <FaBook className='text-purple-600' />
-                      )}
+                      <FaBook className='text-purple-600' />
                     </div>
                     <div className='flex-1 min-w-0'>
                       <h3 className='font-medium text-gray-800 line-clamp-1'>{group.title}</h3>
@@ -233,54 +258,11 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHis
                     </div>
                   </div>
                   <div className='flex items-center ml-2'>
-                    <div
-                      className={`p-2 rounded-full transition-colors ${expandedGroupId === group.id ? 'bg-purple-100' : 'bg-gray-100'}`}
-                    >
-                      {expandedGroupId === group.id ? (
-                        <FaChevronUp
-                          className={`${expandedGroupId === group.id ? 'text-purple-600' : 'text-gray-400'}`}
-                        />
-                      ) : (
-                        <FaChevronDown className='text-gray-400' />
-                      )}
+                    <div className='p-2 rounded-full bg-gray-100 transition-colors'>
+                      <FaChevronRight className='text-gray-400' />
                     </div>
                   </div>
                 </div>
-
-                {expandedGroupId === group.id && (
-                  <div className='p-4 bg-gray-50 border-t border-gray-200 animate-fade-in'>
-                    <div className='space-y-4'>
-                      {group.messages.map((message, index) => (
-                        <div
-                          key={index}
-                          className={`p-3 rounded-lg ${
-                            message.role === 'user'
-                              ? 'bg-purple-50 border-l-4 border-purple-400 ml-4'
-                              : 'bg-white border-l-4 border-gray-300 mr-4'
-                          }`}
-                        >
-                          <div className='mb-1'>
-                            <span
-                              className={`text-xs font-medium px-2 py-1 rounded-full ${
-                                message.role === 'user' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {message.role === 'user' ? '사용자' : '작가'}
-                            </span>
-                          </div>
-
-                          <div className='text-gray-700 text-sm'>
-                            {message.role === 'user' ? (
-                              <p>{message.content}</p>
-                            ) : (
-                              <MarkdownRenderer content={message.content} />
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </li>
             ))}
           </ul>
@@ -288,6 +270,66 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ messages, onClose, onClearHis
       </div>
     </div>
   );
+
+  // 대화 상세 화면
+  const ConversationDetailView = () => {
+    if (!selectedGroup) return null;
+
+    return (
+      <div className='fixed inset-0 bg-white z-50 flex flex-col animate-slide-up'>
+        <header className='p-4 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm'>
+          <div className='flex items-center'>
+            <button
+              onClick={handleBackToList}
+              className='mr-3 p-2 rounded-full hover:bg-gray-100 transition-colors'
+              aria-label='뒤로 가기'
+            >
+              <FaArrowLeft className='text-gray-700' />
+            </button>
+            <div>
+              <h2 className='text-xl font-semibold text-gray-800 line-clamp-1'>{selectedGroup.title}</h2>
+              <p className='text-xs text-gray-500 flex items-center'>
+                <FaBook className='mr-1' />
+                <span className='line-clamp-1'>{selectedGroup.url}</span>
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <div className='flex-1 overflow-y-auto p-4 bg-gray-50'>
+          <div className='max-w-3xl mx-auto space-y-4'>
+            {selectedGroup.messages.map((message, index) => (
+              <div
+                key={index}
+                className={`p-4 rounded-lg shadow-sm ${
+                  message.role === 'user'
+                    ? 'bg-purple-50 border-l-4 border-purple-400 ml-4'
+                    : 'bg-white border-l-4 border-gray-300 mr-4'
+                }`}
+              >
+                <div className='mb-2'>
+                  <span
+                    className={`text-xs font-medium px-2 py-1 rounded-full ${
+                      message.role === 'user' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    {message.role === 'user' ? '사용자' : '작가'}
+                  </span>
+                </div>
+
+                <div className='text-gray-700'>
+                  {message.role === 'user' ? <p>{message.content}</p> : <MarkdownRenderer content={message.content} />}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // 선택된 그룹이 있으면 상세 화면을, 없으면 목록 화면을 표시
+  return selectedGroupId !== null ? <ConversationDetailView /> : <ConversationListView />;
 };
 
 export default ChatHistory;
