@@ -9,7 +9,7 @@ interface PersonaCreatorProps {
 const PersonaCreator = ({ onCreatePersona, isLoading }: PersonaCreatorProps) => {
   return (
     <div className='flex-1 flex flex-col items-center justify-center p-6 text-center'>
-      <div className='text-blue-600'>
+      <div className='text-purple-600'>
         <img src={chatIcon} alt='Chat Icon' width={120} height={120} />
       </div>
 
@@ -23,7 +23,7 @@ const PersonaCreator = ({ onCreatePersona, isLoading }: PersonaCreatorProps) => 
       <button
         onClick={onCreatePersona}
         disabled={isLoading}
-        className='px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:bg-blue-400 flex items-center'
+        className='px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:bg-purple-400 flex items-center'
       >
         {isLoading ? (
           <>

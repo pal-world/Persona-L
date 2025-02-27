@@ -47,12 +47,12 @@ function App() {
     }
 
     setIsLoading(true);
-    
+
     try {
       // 페르소나 생성 버튼 클릭 시 페이지 콘텐츠 가져오기
       const content = await fetchPageContent();
       setPageContent(content);
-      
+
       if (!content || content.trim().length < 50) {
         setError('페이지 콘텐츠가 충분하지 않습니다.');
         setIsLoading(false);
@@ -101,14 +101,14 @@ function App() {
 
   return (
     <div className='min-h-screen flex flex-col bg-gray-100 w-[400px] h-[600px]'>
-      <header className='bg-blue-600 text-white p-4 shadow-md flex justify-between items-center'>
+      <header className='bg-purple-600 text-white p-4 shadow-md flex justify-between items-center'>
         <div>
           <h1 className='text-xl font-bold'>Persona-L</h1>
           <p className='text-sm opacity-80'>작가의 마음으로 글을 이해하세요</p>
         </div>
         <button
           onClick={() => setShowSettings(true)}
-          className='p-2 rounded-full hover:bg-blue-700 transition-colors'
+          className='p-2 rounded-full hover:bg-purple-700 transition-colors'
           title='API 키 설정'
         >
           <FaCog />
@@ -125,7 +125,7 @@ function App() {
         {!apiKey && (
           <div className='bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 m-2'>
             <p>API 키를 설정해주세요.</p>
-            <button onClick={() => setShowSettings(true)} className='mt-2 text-blue-600 hover:underline'>
+            <button onClick={() => setShowSettings(true)} className='mt-2 text-purple-600 hover:underline'>
               API 키 설정하기
             </button>
           </div>

@@ -16,12 +16,24 @@
   font-weight: 600;
 }
 
-.markdown-content h1 { font-size: 1.5em; }
-.markdown-content h2 { font-size: 1.3em; }
-.markdown-content h3 { font-size: 1.2em; }
-.markdown-content h4 { font-size: 1.1em; }
-.markdown-content h5 { font-size: 1em; }
-.markdown-content h6 { font-size: 0.9em; }
+.markdown-content h1 {
+  font-size: 1.5em;
+}
+.markdown-content h2 {
+  font-size: 1.3em;
+}
+.markdown-content h3 {
+  font-size: 1.2em;
+}
+.markdown-content h4 {
+  font-size: 1.1em;
+}
+.markdown-content h5 {
+  font-size: 1em;
+}
+.markdown-content h6 {
+  font-size: 0.9em;
+}
 
 .markdown-content p {
   margin-bottom: 1em;
@@ -46,7 +58,7 @@
 }
 
 .markdown-content a {
-  color: #3182ce;
+  color: #9f7aea;
   text-decoration: underline;
 }
 
@@ -104,4 +116,4 @@
   border: 0;
   border-top: 1px solid #e2e8f0;
   margin: 1.5em 0;
-} 
+}

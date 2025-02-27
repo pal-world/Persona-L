@@ -40,15 +40,11 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
             <div
               className={`p-3 rounded-lg ${
                 message.role === 'user'
-                  ? 'bg-blue-600 text-white rounded-br-none'
+                  ? 'bg-purple-600 text-white rounded-br-none'
                   : 'bg-gray-200 text-gray-800 rounded-bl-none'
               }`}
             >
-              {message.role === 'user' ? (
-                message.content
-              ) : (
-                <MarkdownRenderer content={message.content} />
-              )}
+              {message.role === 'user' ? message.content : <MarkdownRenderer content={message.content} />}
             </div>
           </div>
         ))}
@@ -78,7 +74,7 @@ const ChatInterface = ({ messages, isLoading, onSendMessage }: ChatInterfaceProp
           <button
             type='submit'
             disabled={isLoading || !input.trim()}
-            className='bg-blue-600 text-white p-2 rounded-r-lg hover:bg-blue-700 disabled:bg-blue-400'
+            className='bg-purple-600 text-white p-2 rounded-r-lg hover:bg-purple-700 disabled:bg-purple-400'
           >
             {isLoading ? <FaSpinner className='animate-spin' /> : <FaPaperPlane />}
           </button>
