@@ -23,6 +23,11 @@ const ApiKeySettings = ({ onClose }: ApiKeySettingsProps) => {
     }
 
     await setApiKey(inputKey.trim());
+    
+    // 키가 유효하면 설정 화면 닫기
+    if (useApiKeyStore.getState().isKeyValid) {
+      onClose();
+    }
   };
 
   const handleClearKey = () => {

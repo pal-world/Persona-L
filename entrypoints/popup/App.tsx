@@ -6,19 +6,53 @@ import { generatePersona, chatWithPersona } from '../services/openaiService';
 import ChatInterface from './components/ChatInterface';
 import PersonaCreator from './components/PersonaCreator';
 import ApiKeySettings from './components/ApiKeySettings';
-import { FaCog } from 'react-icons/fa';
+import { FaCog, FaSpinner } from 'react-icons/fa';
 import { initializeApiKey } from '../store/apiKeyStore';
 
 function App() {
-  const { persona, messages, isLoading, error, setPersona, addMessage, setIsLoading, setError } = usePersonaStore();
-  const { apiKey, isKeyValid } = useApiKeyStore();
+  const { persona, messages, isLoading, error, setPersona, addMessage, setIsLoading, setError, clearChat } = usePersonaStore();
+  const { apiKey, isInitialized } = useApiKeyStore();
   const [pageContent, setPageContent] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [prevApiKey, setPrevApiKey] = useState<string | null>(null);
 
+  // 초기화
   useEffect(() => {
-    // API 키 초기화
-    initializeApiKey();
+    const initialize = async () => {
+      setIsInitializing(true);
+      await initializeApiKey();
+      setIsInitializing(false);
+    };
+
+    initialize();
   }, []);
+
+  // API 키 변경 감지
+  useEffect(() => {
+    // 이전 API 키가 있고, 현재 API 키가 없는 경우 (API 키가 삭제된 경우)
+    if (prevApiKey && !apiKey) {
+      // 페르소나와 대화 내용 초기화
+      setPersona('');
+      clearChat();
+      setPageContent('');
+      setError(null);
+    }
+    
+    // 현재 API 키 상태 저장
+    setPrevApiKey(apiKey);
+  }, [apiKey, prevApiKey, setPersona, clearChat, setError]);
+
+  // API 키가 변경될 때 에러 메시지 초기화
+  useEffect(() => {
+    if (apiKey) setError(null);
+  }, [apiKey, setError]);
+
+  const handleCloseSettings = () => {
+    setShowSettings(false);
+    // API 키 관련 에러 메시지 초기화
+    if (apiKey) setError(null);
+  };
 
   const fetchPageContent = async (): Promise<string> => {
     try {
@@ -99,6 +133,16 @@ function App() {
     }
   };
 
+  // 초기화 중이거나 API 키 초기화가 완료되지 않았을 때 로딩 표시
+  if (isInitializing || !isInitialized) {
+    return (
+      <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 via-white to-purple-100 w-[400px] h-[600px] font-sans'>
+        <FaSpinner className='animate-spin text-purple-600 text-4xl mb-4' />
+        <p className='text-gray-600'>초기화 중...</p>
+      </div>
+    );
+  }
+
   return (
     <div className='min-h-screen flex flex-col bg-gradient-to-br from-purple-50 via-white to-purple-100 w-[400px] h-[600px] font-sans'>
       <header className='app-header'>
@@ -137,14 +181,14 @@ function App() {
           </div>
         )}
 
-        {!persona ? (
-          <PersonaCreator onCreatePersona={handleCreatePersona} isLoading={isLoading} />
-        ) : (
+        {persona ? (
           <ChatInterface messages={messages} isLoading={isLoading} onSendMessage={handleSendMessage} />
+        ) : (
+          <PersonaCreator onCreatePersona={handleCreatePersona} isLoading={isLoading} />
         )}
       </main>
 
-      {showSettings && <ApiKeySettings onClose={() => setShowSettings(false)} />}
+      {showSettings && <ApiKeySettings onClose={handleCloseSettings} />}
     </div>
   );
 }

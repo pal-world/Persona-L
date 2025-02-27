@@ -51,33 +51,35 @@ const ChatInput = React.memo(
     };
 
     return (
-      <div className='chat-input-group'>
-        <input
-          type='text'
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder='메시지를 입력하세요...'
-          disabled={isLoading}
-          className='chat-input'
-          autoComplete='off'
-          spellCheck='false'
-        />
-        <button
-          onClick={handleSendMessage}
-          disabled={!input.trim() || isLoading}
-          className='chat-send-button btn-micro-interaction btn-glow-effect'
-          aria-label='메시지 보내기'
-        >
-          {isLoading ? (
-            <FaSpinner className='animate-spin text-lg' />
-          ) : (
-            <div className='relative w-full h-full flex items-center justify-center'>
-              <FaPaperPlane className='text-lg transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300' />
-              <div className='absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-full scale-0 group-hover:scale-100 transition-all duration-300'></div>
-            </div>
-          )}
-        </button>
+      <div className='flex flex-col gap-1'>
+        <div className='chat-input-group'>
+          <input
+            type='text'
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder='메시지를 입력하세요...'
+            disabled={isLoading}
+            className='chat-input'
+            autoComplete='off'
+            spellCheck='false'
+          />
+          <button
+            onClick={handleSendMessage}
+            disabled={!input.trim() || isLoading}
+            className='chat-send-button btn-micro-interaction btn-glow-effect'
+            aria-label='메시지 보내기'
+          >
+            {isLoading ? (
+              <FaSpinner className='animate-spin text-lg' />
+            ) : (
+              <div className='relative w-full h-full flex items-center justify-center'>
+                <FaPaperPlane className='text-lg transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300' />
+                <div className='absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-full scale-0 group-hover:scale-100 transition-all duration-300'></div>
+              </div>
+            )}
+          </button>
+        </div>
       </div>
     );
   },
@@ -106,7 +108,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <div className='p-4 border-t border-purple-300/50 bg-white bg-opacity-70 backdrop-blur-sm'>
+      <div className='p-4 pt-3 pb-3 border-t border-purple-300/50 bg-white bg-opacity-70 backdrop-blur-sm'>
         <ChatInput input={input} setInput={setInput} handleSendMessage={handleSendMessage} isLoading={isLoading} />
       </div>
     </div>
