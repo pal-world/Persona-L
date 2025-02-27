@@ -71,6 +71,10 @@
   line-height: 1.7;
 }
 
+.markdown-content p {
+  margin-bottom: 5px;
+}
+
 .markdown-content ul,
 .markdown-content ol {
   margin-bottom: 1em;
