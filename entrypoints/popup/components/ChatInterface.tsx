@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaPaperPlane, FaSpinner } from 'react-icons/fa';
+import { FaPaperPlane, FaSpinner, FaTimes } from 'react-icons/fa';
 import MarkdownRenderer from './MarkdownRenderer';
 
 interface Message {
@@ -11,6 +11,7 @@ interface ChatInterfaceProps {
   messages: Message[];
   isLoading: boolean;
   onSendMessage: (message: string) => void;
+  onEndChat: () => void;
 }
 
 // 메시지 아이템 컴포넌트를 메모이제이션하여 성능 최적화
@@ -85,7 +86,7 @@ const ChatInput = React.memo(
   },
 );
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, isLoading }) => {
+const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, isLoading, onEndChat }) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -102,6 +103,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, 
 
   return (
     <div className='flex flex-col h-full glass-card rounded-modern-lg overflow-hidden'>
+      <div className='flex justify-between items-center p-3 border-b border-purple-300/50 bg-white'>
+        <h2 className='text-lg font-semibold text-gray-800'>작가와의 대화</h2>
+        <button
+          onClick={onEndChat}
+          className='text-gray-500 hover:text-red-500 transition-colors p-1.5 rounded-full hover:bg-gray-100'
+          title='대화 종료'
+        >
+          <FaTimes className='text-lg' />
+        </button>
+      </div>
       <div className='flex-1 overflow-y-auto p-4 space-y-4 bg-white'>
         {messages.map((message, index) => (
           <MessageItem key={index} message={message} />

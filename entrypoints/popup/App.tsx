@@ -133,6 +133,14 @@ function App() {
     }
   };
 
+  // 채팅 종료 함수 추가
+  const handleEndChat = () => {
+    // 페르소나와 대화 내용 초기화
+    setPersona('');
+    clearChat();
+    setError(null);
+  };
+
   // 초기화 중이거나 API 키 초기화가 완료되지 않았을 때 로딩 표시
   if (isInitializing || !isInitialized) {
     return (
@@ -182,7 +190,12 @@ function App() {
         )}
 
         {persona ? (
-          <ChatInterface messages={messages} isLoading={isLoading} onSendMessage={handleSendMessage} />
+          <ChatInterface 
+            messages={messages} 
+            isLoading={isLoading} 
+            onSendMessage={handleSendMessage} 
+            onEndChat={handleEndChat}
+          />
         ) : (
           <PersonaCreator onCreatePersona={handleCreatePersona} isLoading={isLoading} />
         )}
