@@ -206,6 +206,86 @@
     @apply focus:scale-102 transition-transform duration-250;
   }
 
+  /* 텍스트 라인 제한 */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  /* 전체화면 전환 애니메이션 */
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out forwards;
+  }
+
+  .animate-slide-down {
+    animation: slide-down 0.3s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+
+  .animate-bounce-sm {
+    animation: bounce-sm 0.5s ease-in-out;
+  }
+
+  @keyframes slide-up {
+    0% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-down {
+    0% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  @keyframes fade-in {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes bounce-sm {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
   /* 보라색 글로우 효과 */
   .btn-glow-effect {
     position: relative;

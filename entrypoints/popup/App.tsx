@@ -6,14 +6,17 @@ import { generatePersona, chatWithPersona } from '../services/openaiService';
 import ChatInterface from './components/ChatInterface';
 import PersonaCreator from './components/PersonaCreator';
 import ApiKeySettings from './components/ApiKeySettings';
-import { FaCog, FaSpinner } from 'react-icons/fa';
+import ChatHistory from './components/ChatHistory';
+import { FaCog, FaSpinner, FaList } from 'react-icons/fa';
 import { initializeApiKey } from '../store/apiKeyStore';
 
 function App() {
-  const { persona, messages, isLoading, error, setPersona, addMessage, setIsLoading, setError, clearChat } = usePersonaStore();
+  const { persona, messages, isLoading, error, setPersona, addMessage, setIsLoading, setError, clearChat } =
+    usePersonaStore();
   const { apiKey, isInitialized } = useApiKeyStore();
   const [pageContent, setPageContent] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
+  const [showChatHistory, setShowChatHistory] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [prevApiKey, setPrevApiKey] = useState<string | null>(null);
 
@@ -38,7 +41,7 @@ function App() {
       setPageContent('');
       setError(null);
     }
-    
+
     // 현재 API 키 상태 저장
     setPrevApiKey(apiKey);
   }, [apiKey, prevApiKey, setPersona, clearChat, setError]);
@@ -52,6 +55,10 @@ function App() {
     setShowSettings(false);
     // API 키 관련 에러 메시지 초기화
     if (apiKey) setError(null);
+  };
+
+  const handleCloseChatHistory = () => {
+    setShowChatHistory(false);
   };
 
   const fetchPageContent = async (): Promise<string> => {
@@ -158,13 +165,24 @@ function App() {
           <h1>Persona-L</h1>
           <p>작가의 마음으로 글을 이해하세요</p>
         </div>
-        <button
-          onClick={() => setShowSettings(true)}
-          className='btn-icon btn-glow-effect hover:bg-purple-500 hover:bg-opacity-50 text-white hover:rotate-12 transition-transform rounded-modern'
-          title='API 키 설정'
-        >
-          <FaCog className='text-lg' />
-        </button>
+        <div className='flex items-center gap-2'>
+          {messages.length > 0 && (
+            <button
+              onClick={() => setShowChatHistory(true)}
+              className='btn-icon btn-glow-effect hover:bg-purple-500 hover:bg-opacity-50 text-white hover:rotate-12 transition-transform rounded-modern'
+              title='대화 내역'
+            >
+              <FaList className='text-lg' />
+            </button>
+          )}
+          <button
+            onClick={() => setShowSettings(true)}
+            className='btn-icon btn-glow-effect hover:bg-purple-500 hover:bg-opacity-50 text-white hover:rotate-12 transition-transform rounded-modern'
+            title='API 키 설정'
+          >
+            <FaCog className='text-lg' />
+          </button>
+        </div>
       </header>
 
       <main className='flex-1 overflow-auto p-4.5 flex flex-col gap-4.5'>
@@ -190,10 +208,10 @@ function App() {
         )}
 
         {persona ? (
-          <ChatInterface 
-            messages={messages} 
-            isLoading={isLoading} 
-            onSendMessage={handleSendMessage} 
+          <ChatInterface
+            messages={messages}
+            isLoading={isLoading}
+            onSendMessage={handleSendMessage}
             onEndChat={handleEndChat}
           />
         ) : (
@@ -202,6 +220,9 @@ function App() {
       </main>
 
       {showSettings && <ApiKeySettings onClose={handleCloseSettings} />}
+      {showChatHistory && (
+        <ChatHistory messages={messages} onClose={handleCloseChatHistory} onClearHistory={handleEndChat} />
+      )}
     </div>
   );
 }
