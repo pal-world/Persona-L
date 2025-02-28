@@ -10,9 +10,11 @@ import {
   FaBookmark,
   FaEllipsisV,
   FaExclamationTriangle,
+  FaCommentAlt,
 } from 'react-icons/fa';
 import MarkdownRenderer from './MarkdownRenderer';
 import { usePersonaStore } from '../../store/personaStore';
+import AnimatedPage from './AnimatedPage';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -116,6 +118,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { savedConversations, deleteSavedConversation } = usePersonaStore(); // 저장된 대화 목록 가져오기
   const searchInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>; // 검색 입력창 참조 추가
+  const [detailVisible, setDetailVisible] = useState(false); // 상세 페이지 애니메이션을 위한 상태 추가
 
   // URL 형식 가공 함수
   const formatUrl = (url: string): string => {
@@ -166,12 +169,68 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
   // 그룹 선택 핸들러
   const handleSelectGroup = (groupId: string) => {
     setSelectedGroupId(groupId);
+    // 애니메이션을 위해 약간의 지연 후 detailVisible 상태 변경
+    setTimeout(() => {
+      setDetailVisible(true);
+    }, 10);
   };
 
   // 대화 상세 화면에서 뒤로가기
-  const handleBackToList = () => {
+  const handleBackToList = useCallback(() => {
+    // 애니메이션 효과를 부드럽게 하기 위해 먼저 애니메이션을 시작하고 나중에 상태를 변경
+    setDetailVisible(false);
+  }, []);
+
+  // 애니메이션 완료 후 상태 업데이트
+  const handleDetailExitComplete = useCallback(() => {
+    // 애니메이션이 완료된 후에만 선택된 그룹을 null로 설정
     setSelectedGroupId(null);
-  };
+    // 필요한 경우 검색 입력에 다시 포커스
+    if (searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, []);
+
+  // 컴포넌트 첫 렌더링 시 실행
+  useEffect(() => {
+    // 화면 전환 시 깜빡임 방지를 위한 스타일 적용
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .transition-container { 
+        position: relative;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+      .page-enter {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 10;
+        transform: translateX(100%);
+      }
+      .page-enter-active {
+        transform: translateX(0);
+        transition: transform 300ms ease-in-out;
+      }
+      .page-exit {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        z-index: 9;
+        transform: translateX(0);
+      }
+      .page-exit-active {
+        transform: translateX(-100%);
+        transition: transform 300ms ease-in-out;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   // 날짜 포맷팅 함수
   const formatDate = (date: Date) => {
@@ -260,11 +319,11 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
   // 메시지가 없을 때 표시할 컴포넌트
   const EmptyState = () => (
     <div className='flex flex-col items-center justify-center h-full py-12 px-4 text-center'>
-      <div className='w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4'>
-        <FaBookmark className='text-purple-500 text-xl' />
+      <div className='w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4 shadow-sm'>
+        <FaCommentAlt className='text-purple-500 text-xl' />
       </div>
-      <h3 className='text-lg font-medium text-gray-800 mb-2'>저장된 대화가 없습니다</h3>
-      <p className='text-gray-500 max-w-xs'>
+      <h3 className='text-xl font-medium text-gray-800 mb-2'>저장된 대화가 없습니다</h3>
+      <p className='text-gray-500 max-w-xs text-center'>
         아직 저장된 대화가 없습니다. 대화 중 저장 버튼을 눌러 대화를 저장해보세요.
       </p>
     </div>
@@ -272,93 +331,18 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
 
   // 검색 결과가 없을 때 표시할 컴포넌트
   const NoSearchResults = () => (
-    <div className='flex flex-col items-center justify-center py-12 px-4 text-center'>
-      <div className='w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3'>
-        <FaSearch className='text-gray-400 text-lg' />
+    <div className='flex flex-col items-center justify-center h-full py-12 px-4 text-center'>
+      <div className='w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 shadow-sm'>
+        <FaSearch className='text-gray-400 text-xl' />
       </div>
-      <h3 className='text-lg font-medium text-gray-800 mb-2'>검색 결과가 없습니다</h3>
+      <h3 className='text-xl font-medium text-gray-800 mb-2'>검색 결과가 없습니다</h3>
       <p className='text-gray-500 max-w-xs'>다른 검색어로 다시 시도해보세요.</p>
-    </div>
-  );
-
-  // 검색어 변경 핸들러 - useCallback으로 메모이제이션
-  const handleSearchChange = useCallback((value: string) => {
-    setSearchTerm(value);
-  }, []);
-
-  // 대화 목록 화면
-  const ConversationListView = () => (
-    <div className='fixed inset-0 bg-white z-50 flex flex-col'>
-      <header className='p-4 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm'>
-        <div className='flex items-center'>
-          <button
-            onClick={onClose}
-            className='mr-3 p-2 rounded-full hover:bg-gray-100 transition-colors'
-            aria-label='뒤로 가기'
-          >
-            <FaArrowLeft className='text-gray-700' />
-          </button>
-          <h2 className='text-xl font-semibold text-gray-800'>저장된 대화</h2>
-        </div>
-      </header>
-
-      <SearchInputComponent searchTerm={searchTerm} onSearchChange={handleSearchChange} inputRef={searchInputRef} />
-
-      <div className='flex-1 overflow-y-auto bg-gray-50'>
-        {conversationGroups.length === 0 ? (
-          <EmptyState />
-        ) : filteredGroups.length === 0 ? (
-          <NoSearchResults />
-        ) : (
-          <div className='divide-y divide-gray-200'>
-            {filteredGroups.map((group) => (
-              <div
-                key={group.id}
-                className='p-4 bg-white hover:bg-gray-50 transition-colors cursor-pointer relative'
-                onClick={() => handleSelectGroup(group.id)}
-              >
-                <div className='flex justify-between items-start mb-2'>
-                  <div className='flex items-center flex-1 min-w-0 mr-4'>
-                    <div className='w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3 flex-shrink-0'>
-                      <FaUser className='text-purple-600' />
-                    </div>
-                    <div className='min-w-0'>
-                      <h3 className='font-medium text-gray-800 flex items-center truncate'>
-                        {group.title}
-                        <FaBookmark className='text-purple-500 ml-2 text-sm flex-shrink-0' title='저장된 대화' />
-                      </h3>
-                      <p className='text-xs text-gray-500 flex items-center mt-1 truncate'>
-                        <FaGlobe className='mr-1 flex-shrink-0' />
-                        <span className='truncate'>{group.url}</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className='flex items-center flex-shrink-0'>
-                    <span className='text-xs text-gray-500 flex items-center whitespace-nowrap mr-3'>
-                      <FaClock className='mr-1' />
-                      {formatDate(group.timestamp)}
-                    </span>
-                    <button
-                      onClick={(e) => handleDeleteSavedConversation(group.id, e)}
-                      className='p-2 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors mr-2'
-                      aria-label='대화 삭제'
-                      title='대화 삭제'
-                    >
-                      <FaTrash className='text-sm' />
-                    </button>
-                    <FaChevronRight className='text-gray-400' />
-                  </div>
-                </div>
-                <div className='ml-13 pl-0'>
-                  <p className='text-sm text-gray-600 line-clamp-2'>
-                    {group.messages[0]?.content.substring(0, 100)}...
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <button
+        onClick={() => setSearchTerm('')}
+        className='mt-4 px-4 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors'
+      >
+        모든 대화 보기
+      </button>
     </div>
   );
 
@@ -367,39 +351,30 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
     if (!selectedGroup) return null;
 
     return (
-      <div className='fixed inset-0 bg-white z-50 flex flex-col'>
-        <header className='p-4 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm'>
-          <div className='flex items-center flex-1 min-w-0 mr-4'>
-            <button
-              onClick={handleBackToList}
-              className='mr-3 p-2 rounded-full hover:bg-gray-100 transition-colors flex-shrink-0'
-              aria-label='뒤로 가기'
-            >
-              <FaArrowLeft className='text-gray-700' />
-            </button>
-            <div className='min-w-0'>
-              <h2 className='text-xl font-semibold text-gray-800 flex items-center truncate'>
-                <span className='truncate'>{selectedGroup.title}</span>
-                <FaBookmark className='text-purple-500 ml-2 text-sm flex-shrink-0' title='저장된 대화' />
-              </h2>
-              <p className='text-xs text-gray-500 flex items-center truncate'>
-                <FaGlobe className='mr-1 flex-shrink-0' />
-                <span className='truncate'>{selectedGroup.url}</span>
-              </p>
-            </div>
+      <div className='h-full bg-white z-50 flex flex-col'>
+        <div className='app-header flex items-center justify-center relative'>
+          <button
+            onClick={handleBackToList}
+            className='absolute left-4 p-2 rounded-full hover:bg-purple-600/20 transition-all duration-200 text-white'
+            title='뒤로 가기'
+          >
+            <FaArrowLeft className='w-5 h-5' />
+          </button>
+          <div className='flex flex-col items-center'>
+            <h1 className='text-xl font-bold text-white'>대화 내용</h1>
+            {selectedGroup.url && <p className='text-sm text-white/80 mt-1'>{new URL(selectedGroup.url).hostname}</p>}
           </div>
           <button
             onClick={(e) => handleDeleteSavedConversation(selectedGroup.id, e)}
-            className='p-2 rounded-full hover:bg-red-50 text-red-500 transition-colors flex-shrink-0'
-            aria-label='저장된 대화 삭제'
-            title='저장된 대화 삭제'
+            className='absolute right-4 p-2 rounded-full hover:bg-purple-600/20 transition-all duration-200 text-white'
+            title='대화 삭제'
           >
-            <FaTrash />
+            <FaTrash className='w-5 h-5' />
           </button>
-        </header>
+        </div>
 
         <div className='flex-1 overflow-y-auto p-4 bg-gray-50'>
-          <div className='max-w-3xl mx-auto space-y-4'>
+          <div className='max-w-3xl mx-auto space-y-4 pt-1'>
             {selectedGroup.messages.map((message, index) => (
               <div
                 key={index}
@@ -419,8 +394,16 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
                   </span>
                 </div>
 
-                <div className='text-gray-700'>
-                  {message.role === 'user' ? <p>{message.content}</p> : <MarkdownRenderer content={message.content} />}
+                <div
+                  className={`text-gray-700 ${message.role === 'assistant' ? 'text-base leading-relaxed' : 'text-base'}`}
+                >
+                  {message.role === 'user' ? (
+                    <p className='text-base'>{message.content}</p>
+                  ) : (
+                    <div className='prose prose-sm max-w-none'>
+                      <MarkdownRenderer content={message.content} />
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
@@ -435,47 +418,95 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
       {/* 삭제 확인 모달 */}
       {deleteConfirmId && <DeleteConfirmModal />}
 
-      {/* 헤더 */}
-      <header className='sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'>
-        <div className='flex items-center'>
-          {selectedGroup ? (
-            <button
-              onClick={handleBackToList}
-              className='mr-2 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors'
-            >
-              <FaArrowLeft />
-            </button>
-          ) : (
-            <FaBookmark className='mr-2' />
-          )}
-          <h2 className='text-lg font-semibold'>{selectedGroup ? formatUrl(selectedGroup.url) : '저장된 대화'}</h2>
-        </div>
-        <button onClick={onClose} className='hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors'>
-          <FaArrowLeft />
-        </button>
-      </header>
-
-      {/* 검색 입력 (대화 목록 화면에서만 표시) */}
-      {!selectedGroup && (
-        <SearchInputComponent searchTerm={searchTerm} onSearchChange={setSearchTerm} inputRef={searchInputRef} />
-      )}
-
       {/* 본문 콘텐츠 */}
-      <div className='flex-1 overflow-y-auto'>
-        {!selectedGroup ? (
-          // 대화 목록 화면
-          <>
+      <div className='flex-1 relative overflow-hidden'>
+        {/* 목록 화면 - 항상 렌더링하고 z-index로 관리 */}
+        <div className='h-full w-full flex flex-col absolute inset-0' style={{ zIndex: selectedGroup ? 0 : 1 }}>
+          <div className='app-header flex items-center justify-center relative'>
+            <button
+              onClick={onClose}
+              className='absolute left-4 p-2 rounded-full hover:bg-purple-600/20 transition-all duration-200 text-white'
+              title='뒤로 가기'
+            >
+              <FaArrowLeft className='w-5 h-5' />
+            </button>
+            <h1 className='text-2xl font-bold text-white'>저장된 대화</h1>
+          </div>
+
+          {/* 검색 입력 */}
+          <SearchInputComponent searchTerm={searchTerm} onSearchChange={setSearchTerm} inputRef={searchInputRef} />
+
+          <div className='flex-1 overflow-y-auto bg-gray-50'>
             {conversationGroups.length === 0 ? (
               <EmptyState />
             ) : filteredGroups.length === 0 ? (
               <NoSearchResults />
             ) : (
-              <ConversationListView />
+              <div className='p-4'>
+                <div className='space-y-3 max-w-3xl mx-auto'>
+                  {filteredGroups.map((group) => (
+                    <div
+                      key={group.id}
+                      onClick={() => handleSelectGroup(group.id)}
+                      className='bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:border-purple-300 hover:shadow-md cursor-pointer transition-all duration-200'
+                    >
+                      <div className='flex justify-between items-start'>
+                        <div className='flex-1 min-w-0'>
+                          <div className='flex items-center'>
+                            <div className='w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0'>
+                              <FaGlobe className='text-purple-600 text-xs' />
+                            </div>
+                            <p className='text-sm font-medium text-gray-900 truncate'>
+                              {group.url ? new URL(group.url).hostname : '알 수 없는 사이트'}
+                            </p>
+                          </div>
+                          <p className='text-xs text-gray-500 mt-1 ml-10'>
+                            {new Date(group.timestamp).toLocaleString('ko-KR', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </p>
+                        </div>
+                        <div className='flex items-center'>
+                          <span className='text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mr-2'>
+                            {group.messages.length}개 메시지
+                          </span>
+                          <button
+                            onClick={(e) => handleDeleteSavedConversation(group.id, e)}
+                            className='p-2 rounded-full hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors'
+                            title='대화 삭제'
+                          >
+                            <FaTrash className='w-4 h-4' />
+                          </button>
+                        </div>
+                      </div>
+                      <div className='mt-3 text-sm text-gray-600 line-clamp-2 ml-10'>
+                        {group.messages[0]?.content || '내용 없음'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             )}
-          </>
-        ) : (
-          // 대화 상세 화면
-          <ConversationDetailView />
+          </div>
+        </div>
+
+        {/* 대화 상세 화면 */}
+        {selectedGroup && (
+          <AnimatedPage
+            isVisible={detailVisible}
+            direction='right'
+            onExitComplete={handleDetailExitComplete}
+            className='w-full h-full'
+            useFixedPosition={false}
+          >
+            <div className='h-full w-full bg-white z-10'>
+              <ConversationDetailView />
+            </div>
+          </AnimatedPage>
         )}
       </div>
     </div>

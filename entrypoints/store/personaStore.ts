@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { PersonaResponse } from '../services/openaiService';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -9,7 +10,7 @@ interface Message {
 // 저장된 대화 인터페이스 정의
 interface SavedConversation {
   id: string;
-  persona: string;
+  persona: string; // 저장 시에는 문자열 형태로만 저장
   messages: Message[];
   url: string;
   timestamp: Date;

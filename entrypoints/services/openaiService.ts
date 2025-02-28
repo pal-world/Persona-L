@@ -18,11 +18,16 @@ const getOpenAIInstance = () => {
 export interface ChatCompletionOptions {
   prompt: string;
   pageContent?: string;
-  persona?: string;
+  persona?: string | PersonaResponse;
   messages?: Array<{ role: 'user' | 'assistant'; content: string }>;
 }
 
-export const generatePersona = async (pageContent: string): Promise<string> => {
+export interface PersonaResponse {
+  nickname: string;
+  description: string;
+}
+
+export const generatePersona = async (pageContent: string): Promise<PersonaResponse> => {
   try {
     const openai = getOpenAIInstance();
 
@@ -34,7 +39,12 @@ export const generatePersona = async (pageContent: string): Promise<string> => {
         {
           role: 'system',
           content:
-            '당신은 텍스트를 분석하여 해당 글의 작가의 페르소나를 생성하는 전문가입니다. 마크다운 형식으로 응답해주세요.',
+            '당신은 텍스트를 분석하여 해당 글의 작가의 페르소나를 생성하는 전문가입니다. 마크다운 형식으로 응답해주세요. 다음 형식으로 작가의 페르소나를 생성해주세요:\n\n' +
+            '## 닉네임: [작가의 특성을 잘 반영한 간결한 닉네임]\n\n' +
+            '## 성격\n- [작가의 주요 성격 특성 1]\n- [작가의 주요 성격 특성 2]\n- [작가의 주요 성격 특성 3]\n\n' +
+            '## 글쓰기 스타일\n- [작가의 글쓰기 스타일 특징 1]\n- [작가의 글쓰기 스타일 특징 2]\n\n' +
+            '## 관점과 가치관\n- [작가의 세계관이나 주요 관점 1]\n- [작가의 세계관이나 주요 관점 2]\n\n' +
+            '## 배경/전문 분야\n- [작가의 추정 배경이나 전문 분야]',
         },
         {
           role: 'user',
@@ -44,7 +54,16 @@ export const generatePersona = async (pageContent: string): Promise<string> => {
       temperature: 0.7,
     });
 
-    return response.choices[0].message.content || '페르소나를 생성할 수 없습니다.';
+    const content = response.choices[0].message.content || '페르소나를 생성할 수 없습니다.';
+
+    // 닉네임 추출 (## 닉네임: [닉네임] 형식에서)
+    const nicknameMatch = content.match(/##\s*닉네임:\s*(.+?)(?=\n|$)/);
+
+    // 닉네임을 제외한 나머지 내용을 설명으로 사용
+    return {
+      nickname: nicknameMatch?.[1]?.trim() || '이름 없는 작가',
+      description: content, // 전체 마크다운 형식 내용을 그대로 사용
+    };
   } catch (error) {
     console.error('페르소나 생성 오류:', error);
     throw new Error('페르소나 생성 중 오류가 발생했습니다.');
@@ -63,7 +82,8 @@ export const chatWithPersona = async ({
     // 시스템 메시지 생성
     const systemMessage = {
       role: 'system' as const,
-      content: `당신은 다음과 같은 페르소나를 가진 작가입니다: ${persona}. 
+      content: `당신은 다음과 같은 페르소나를 가진 작가입니다: ${typeof persona === 'string' ? persona : persona?.description}. 
+      ${typeof persona !== 'string' && persona?.nickname ? `당신의 닉네임은 "${persona.nickname}"입니다.` : ''}
       당신이 작성한 글에 대해 독자와 대화하고 있습니다. 당신의 페르소나에 맞게 대답해주세요. 
       마크다운 형식으로 응답하여 텍스트를 강조하거나 구조화할 수 있습니다.`,
     };

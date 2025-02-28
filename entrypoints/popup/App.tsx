@@ -82,10 +82,6 @@ function App() {
     if (apiKey) setError(null);
   };
 
-  const handleCloseSavedConversations = () => {
-    // AnimatedPage가 애니메이션을 처리하므로 여기서는 아무 작업도 하지 않습니다.
-  };
-
   const fetchPageContent = async (): Promise<string> => {
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -131,10 +127,18 @@ function App() {
       }
 
       const newPersona = await generatePersona(content);
-      setPersona(newPersona);
+      setPersona(newPersona.description);
+
+      // 첫 메시지를 더 자세하게 구성
+      const introMessage = `안녕하세요! 저는 "${newPersona.nickname}"입니다.
+
+${newPersona.description}
+
+어떤 것이 궁금하신가요?`;
+
       addMessage({
         role: 'assistant',
-        content: `안녕하세요! 저는 이 글의 작가입니다. ${newPersona.substring(0, 100)}... 어떤 것이 궁금하신가요?`,
+        content: introMessage,
       });
     } catch (err) {
       if (err instanceof Error) {
@@ -281,7 +285,11 @@ function App() {
       {showSettings && <ApiKeySettings onClose={handleCloseSettings} />}
 
       {/* 저장된 대화는 애니메이션 방식으로 표시 */}
-      <AnimatedPage isVisible={showSavedConversations} onExitComplete={() => setShowSavedConversations(false)}>
+      <AnimatedPage
+        isVisible={showSavedConversations}
+        onExitComplete={() => setShowSavedConversations(false)}
+        useFixedPosition={true}
+      >
         <ChatHistory
           messages={[]}
           onClose={() => setShowSavedConversations(false)}
