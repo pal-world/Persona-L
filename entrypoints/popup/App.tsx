@@ -320,6 +320,7 @@ ${newPersona.description}
         isOpen={showSaveConfirm}
         title="대화 저장 확인"
         message="대화를 저장하면 현재 대화가 종료되고 초기 화면으로 돌아갑니다. 계속하시겠습니까?"
+        warningText="이 작업은 되돌릴 수 없습니다."
         onConfirm={handleConfirmSave}
         onCancel={handleCancelSave}
       />

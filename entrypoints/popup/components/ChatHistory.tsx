@@ -3,6 +3,7 @@ import { FaArrowLeft, FaSearch, FaTrash, FaExclamationTriangle, FaCommentAlt, Fa
 import MarkdownRenderer from './MarkdownRenderer';
 import { usePersonaStore } from '../../store/personaStore';
 import AnimatedPage from './AnimatedPage';
+import ConfirmDialog from './ConfirmDialog';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -254,68 +255,23 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
     };
   }, []);
 
-  // 저장된 대화 삭제 핸들러
+  // 대화 삭제 확인 처리
   const handleDeleteSavedConversation = (id: string, e: React.MouseEvent) => {
     e.stopPropagation(); // 이벤트 버블링 방지
-    setDeleteConfirmId(id); // 삭제 확인 모달 표시
+    setDeleteConfirmId(id); // 삭제할 대화 ID 설정
   };
 
-  // 삭제 확인 핸들러
+  // 삭제 확인 처리
   const handleConfirmDelete = () => {
     if (deleteConfirmId) {
       deleteSavedConversation(deleteConfirmId);
-      // 현재 선택된 대화가 삭제된 대화인 경우 목록으로 돌아감
-      if (selectedGroupId === deleteConfirmId) {
-        setSelectedGroupId(null);
-      }
-      setDeleteConfirmId(null); // 모달 닫기
+      setDeleteConfirmId(null);
     }
   };
 
-  // 삭제 취소 핸들러
+  // 삭제 취소 처리
   const handleCancelDelete = () => {
-    setDeleteConfirmId(null); // 모달 닫기
-  };
-
-  // 삭제 확인 모달
-  const DeleteConfirmModal = () => {
-    if (!deleteConfirmId) return null;
-
-    return (
-      <div className='fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center animate-fade-in backdrop-blur-sm'>
-        <div className='bg-white rounded-modern-lg shadow-xl max-w-sm w-full mx-4 overflow-hidden animate-scale-in'>
-          <div className='p-5 border-b border-gray-200 bg-gradient-to-r from-purple-100 to-purple-50'>
-            <div className='flex items-center'>
-              <div className='w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mr-3 shadow-sm'>
-                <FaExclamationTriangle className='text-purple-600' />
-              </div>
-              <h3 className='text-lg font-semibold text-gray-800'>대화 삭제 확인</h3>
-            </div>
-          </div>
-          <div className='p-5 bg-white'>
-            <p className='text-gray-600 mb-5 leading-relaxed'>
-              저장된 대화를 삭제하시겠습니까?
-              <br />
-              <span className='text-sm text-purple-600'>이 작업은 되돌릴 수 없습니다.</span>
-            </p>
-            <div className='flex justify-end gap-3'>
-              <button
-                onClick={handleCancelDelete}
-                className='px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-modern transition-colors'
-              >
-                취소
-              </button>
-              <button
-                onClick={handleConfirmDelete}
-                className='px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-modern transition-colors shadow-sm'
-              >
-                삭제
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+    setDeleteConfirmId(null);
   };
 
   // 메시지가 없을 때 표시할 컴포넌트
@@ -425,8 +381,16 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
 
   return (
     <div className='flex flex-col h-full w-full bg-white'>
-      {/* 삭제 확인 모달 */}
-      {deleteConfirmId && <DeleteConfirmModal />}
+      {/* 삭제 확인 모달 - ConfirmDialog 컴포넌트로 대체 */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        title="대화 삭제 확인"
+        message="이 대화를 정말 삭제하시겠습니까?"
+        warningText="이 작업은 되돌릴 수 없습니다."
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        confirmText="삭제"
+      />
 
       {/* 본문 콘텐츠 */}
       <div className='flex-1 relative overflow-hidden'>
