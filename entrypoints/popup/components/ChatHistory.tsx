@@ -386,37 +386,29 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
                       <span className='text-purple-600 font-medium break-all'>{formatUrl(selectedGroup.url)}</span>{' '}
                       페이지에서 진행되었습니다.
                     </p>
-                    <p className='text-xs text-gray-400 mt-1 truncate hover:text-clip hover:whitespace-normal'>
+                    <a
+                      href={selectedGroup.url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      onClick={(e) => {
+                        e.preventDefault();
+                        window.open(selectedGroup.url, '_blank');
+                      }}
+                      className='text-xs text-gray-400 mt-1 truncate hover:text-clip hover:whitespace-normal hover:text-purple-500 hover:underline cursor-pointer block'
+                    >
                       {selectedGroup.url}
-                    </p>
+                    </a>
                   </div>
                 </div>
               </div>
             )}
             {selectedGroup.messages.map((message, index) => (
-              <div
-                key={index}
-                className={`p-4 rounded-lg shadow-sm ${
-                  message.role === 'user'
-                    ? 'bg-purple-50 border-l-4 border-purple-400 ml-4'
-                    : 'bg-white border-l-4 border-gray-300 mr-4'
-                }`}
-              >
-                <div className='mb-2'>
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      message.role === 'user' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    {message.role === 'user' ? '사용자' : '작가'}
-                  </span>
-                </div>
-
+              <div key={index} className={`message-item ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
                 <div
-                  className={`text-gray-700 ${message.role === 'assistant' ? 'text-base leading-relaxed' : 'text-base'}`}
+                  className={`message-bubble ${message.role === 'user' ? 'message-bubble-user' : 'message-bubble-assistant'}`}
                 >
                   {message.role === 'user' ? (
-                    <p className='text-base'>{message.content}</p>
+                    <p className='text-sm whitespace-pre-wrap break-words'>{message.content}</p>
                   ) : (
                     <div className='prose prose-sm max-w-none'>
                       <MarkdownRenderer content={message.content} />
