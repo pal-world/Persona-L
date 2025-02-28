@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo, memo, useRef, useEffect, useState } from 'react';
 import {
   FaArrowLeft,
   FaSearch,
@@ -35,12 +35,87 @@ interface ConversationGroup {
   timestamp: Date;
 }
 
+// 검색 입력 컴포넌트를 별도의 메모이즈된 컴포넌트로 분리
+interface SearchInputProps {
+  searchTerm: string;
+  onSearchChange: (value: string) => void;
+  inputRef: React.RefObject<HTMLInputElement>;
+}
+
+const SearchInputComponent = memo(({ searchTerm, onSearchChange, inputRef }: SearchInputProps) => {
+  const [inputValue, setInputValue] = useState(searchTerm);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [isActive, setIsActive] = useState(true); // 항상 활성화 상태로 시작
+
+  // 컴포넌트가 마운트될 때 입력 필드에 포커스
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, []);
+
+  // 외부에서 searchTerm이 변경되면 inputValue도 업데이트
+  useEffect(() => {
+    setInputValue(searchTerm);
+  }, [searchTerm]);
+
+  // 입력 값 변경 핸들러
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    setIsActive(true); // 입력 중에는 항상 활성 상태 유지
+
+    // 이전 타이머 취소
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // 300ms 후에 검색 실행 (디바운스)
+    timeoutRef.current = setTimeout(() => {
+      onSearchChange(newValue);
+    }, 300);
+  };
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return (
+    <div className='p-4 border-b border-gray-200 bg-white'>
+      <div
+        className={`flex items-center bg-gray-100 rounded-full px-4 py-2 transition-colors ${
+          isActive ? 'ring-2 ring-purple-400' : ''
+        }`}
+      >
+        <FaSearch className='text-gray-400 mr-2' />
+        <input
+          ref={inputRef}
+          type='text'
+          placeholder='대화 내용 검색...'
+          className='bg-transparent border-none outline-none w-full text-gray-700'
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={() => setIsActive(true)}
+          onBlur={() => setTimeout(() => setIsActive(false), 100)} // 약간의 지연을 두어 깜빡임 방지
+        />
+      </div>
+    </div>
+  );
+});
+
+SearchInputComponent.displayName = 'SearchInputComponent';
+
 const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 수 없는 페이지' }) => {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [isSearchFocused, setIsSearchFocused] = React.useState(false);
-  const [selectedGroupId, setSelectedGroupId] = React.useState<string | null>(null);
-  const [deleteConfirmId, setDeleteConfirmId] = React.useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const { savedConversations, deleteSavedConversation } = usePersonaStore(); // 저장된 대화 목록 가져오기
+  const searchInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>; // 검색 입력창 참조 추가
 
   // URL 형식 가공 함수
   const formatUrl = (url: string): string => {
@@ -206,9 +281,14 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
     </div>
   );
 
+  // 검색어 변경 핸들러 - useCallback으로 메모이제이션
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchTerm(value);
+  }, []);
+
   // 대화 목록 화면
   const ConversationListView = () => (
-    <div className='fixed inset-0 bg-white z-50 flex flex-col animate-slide-up'>
+    <div className='fixed inset-0 bg-white z-50 flex flex-col'>
       <header className='p-4 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm'>
         <div className='flex items-center'>
           <button
@@ -222,22 +302,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
         </div>
       </header>
 
-      <div className='p-4 border-b border-gray-200 bg-white'>
-        <div
-          className={`flex items-center bg-gray-100 rounded-full px-4 py-2 transition-all ${isSearchFocused ? 'ring-2 ring-purple-400' : ''}`}
-        >
-          <FaSearch className='text-gray-400 mr-2' />
-          <input
-            type='text'
-            placeholder='대화 내용 검색...'
-            className='bg-transparent border-none outline-none w-full text-gray-700'
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            onBlur={() => setIsSearchFocused(false)}
-          />
-        </div>
-      </div>
+      <SearchInputComponent searchTerm={searchTerm} onSearchChange={handleSearchChange} inputRef={searchInputRef} />
 
       <div className='flex-1 overflow-y-auto bg-gray-50'>
         {conversationGroups.length === 0 ? (
@@ -302,7 +367,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
     if (!selectedGroup) return null;
 
     return (
-      <div className='fixed inset-0 bg-white z-50 flex flex-col animate-slide-up'>
+      <div className='fixed inset-0 bg-white z-50 flex flex-col'>
         <header className='p-4 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm'>
           <div className='flex items-center flex-1 min-w-0 mr-4'>
             <button
