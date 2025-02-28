@@ -65,7 +65,7 @@
 - **프론트엔드**: React, TypeScript, Tailwind CSS
 - **확장 프로그램**: WXT (Web Extension Tools)
 - **AI 통합**: OpenAI API
-- **상태 관리**: React Context API
+- **상태 관리**: Zustand
 - **패키지 관리자**: Bun
 
 ## 기여하기
