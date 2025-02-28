@@ -20,7 +20,7 @@ const MessageItem = React.memo(({ message }: { message: Message }) => (
   <div className={`message-item ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
     <div className={`message-bubble ${message.role === 'user' ? 'message-bubble-user' : 'message-bubble-assistant'}`}>
       {message.role === 'user' ? (
-        <p className='text-sm'>{message.content}</p>
+        <p className='text-sm whitespace-pre-wrap break-words'>{message.content}</p>
       ) : (
         <MarkdownRenderer content={message.content} />
       )}

@@ -1,5 +1,5 @@
 import React, { useCallback, memo, useRef, useEffect, useState } from 'react';
-import { FaArrowLeft, FaSearch, FaTrash, FaGlobe, FaExclamationTriangle, FaCommentAlt, FaUser } from 'react-icons/fa';
+import { FaArrowLeft, FaSearch, FaTrash, FaExclamationTriangle, FaCommentAlt, FaUser, FaGlobe } from 'react-icons/fa';
 import MarkdownRenderer from './MarkdownRenderer';
 import { usePersonaStore } from '../../store/personaStore';
 import AnimatedPage from './AnimatedPage';
@@ -10,9 +10,7 @@ interface Message {
 }
 
 interface ChatHistoryProps {
-  messages: Message[];
   onClose: () => void;
-  onClearHistory: () => void;
   currentUrl?: string; // 현재 페이지 URL
 }
 
@@ -98,6 +96,41 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
   const { savedConversations, deleteSavedConversation } = usePersonaStore(); // 저장된 대화 목록 가져오기
   const searchInputRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>; // 검색 입력창 참조 추가
   const [detailVisible, setDetailVisible] = useState(false); // 상세 페이지 애니메이션을 위한 상태 추가
+
+  // 상대적 시간 표시 함수 (몇 시간 전, 하루 전 등)
+  const formatRelativeTime = (timestamp: Date): string => {
+    const now = new Date();
+    const diff = now.getTime() - timestamp.getTime();
+
+    // 시간 차이를 밀리초에서 각 단위로 변환
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    // 1시간 미만
+    if (minutes < 60) {
+      return minutes <= 1 ? '방금 전' : `${minutes}분 전`;
+    }
+    // 24시간 미만
+    else if (hours < 24) {
+      return `${hours}시간 전`;
+    }
+    // 7일 이내
+    else if (days < 7) {
+      const dayNames = ['하루', '이틀', '사흘', '나흘', '닷새', '엿새'];
+      return days < 7 ? `${days === 1 ? dayNames[0] : days <= 6 ? dayNames[days - 1] : days + '일'} 전` : '일주일 전';
+    }
+    // 7일 초과
+    else {
+      return timestamp.toLocaleString('ko-KR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    }
+  };
 
   // URL 형식 가공 함수
   const formatUrl = (url: string): string => {
@@ -443,15 +476,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
                             </div>
                             <p className='text-sm font-medium text-gray-900 truncate'>{group.title}</p>
                           </div>
-                          <p className='text-xs text-gray-500 mt-1 ml-10'>
-                            {new Date(group.timestamp).toLocaleString('ko-KR', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </p>
+                          <p className='text-xs text-gray-500 mt-1 ml-10'>{formatRelativeTime(group.timestamp)}</p>
                         </div>
                         <div className='flex items-center'>
                           <span className='text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full mr-2'>

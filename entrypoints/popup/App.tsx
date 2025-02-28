@@ -14,7 +14,6 @@ import { initializeApiKey } from '../store/apiKeyStore';
 function App() {
   const {
     persona,
-    personaNickname,
     messages,
     isLoading,
     error,
@@ -296,12 +295,7 @@ ${newPersona.description}
         onExitComplete={() => setShowSavedConversations(false)}
         useFixedPosition={true}
       >
-        <ChatHistory
-          messages={[]}
-          onClose={() => setShowSavedConversations(false)}
-          onClearHistory={() => {}}
-          currentUrl={currentUrl}
-        />
+        <ChatHistory onClose={() => setShowSavedConversations(false)} currentUrl={currentUrl} />
       </AnimatedPage>
     </div>
   );

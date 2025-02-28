@@ -466,6 +466,9 @@
 
   .message-bubble-user {
     @apply bg-purple-200 text-gray-800 rounded-br-none shadow-sm;
+    word-break: break-word;
+    white-space: pre-wrap;
+    text-align: left;
   }
 
   .message-bubble-assistant {
