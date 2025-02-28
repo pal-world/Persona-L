@@ -7,19 +7,31 @@ import ChatInterface from './components/ChatInterface';
 import PersonaCreator from './components/PersonaCreator';
 import ApiKeySettings from './components/ApiKeySettings';
 import ChatHistory from './components/ChatHistory';
-import { FaCog, FaSpinner, FaList } from 'react-icons/fa';
+import { FaCog, FaSpinner, FaBookmark } from 'react-icons/fa';
 import { initializeApiKey } from '../store/apiKeyStore';
 
 function App() {
-  const { persona, messages, isLoading, error, setPersona, addMessage, setIsLoading, setError, clearChat } =
-    usePersonaStore();
+  const {
+    persona,
+    messages,
+    isLoading,
+    error,
+    setPersona,
+    addMessage,
+    setIsLoading,
+    setError,
+    clearChat,
+    saveCurrentConversation,
+    savedConversations,
+  } = usePersonaStore();
   const { apiKey, isInitialized } = useApiKeyStore();
   const [pageContent, setPageContent] = useState<string>('');
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
-  const [showChatHistory, setShowChatHistory] = useState(false);
+  const [showSavedConversations, setShowSavedConversations] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [prevApiKey, setPrevApiKey] = useState<string | null>(null);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
   // 초기화
   useEffect(() => {
@@ -69,8 +81,8 @@ function App() {
     if (apiKey) setError(null);
   };
 
-  const handleCloseChatHistory = () => {
-    setShowChatHistory(false);
+  const handleCloseSavedConversations = () => {
+    setShowSavedConversations(false);
   };
 
   const fetchPageContent = async (): Promise<string> => {
@@ -165,6 +177,27 @@ function App() {
     setError(null);
   };
 
+  // 대화 저장 함수 추가
+  const handleSaveChat = () => {
+    if (persona && messages.length > 0) {
+      // 현재 대화 저장
+      saveCurrentConversation(currentUrl);
+
+      // 저장 성공 메시지 표시
+      setShowSaveSuccess(true);
+
+      // 페르소나와 대화 내용 초기화하여 페르소나 생성 페이지로 돌아가기
+      setPersona('');
+      clearChat();
+      setError(null);
+
+      // 3초 후 성공 메시지 숨기기
+      setTimeout(() => {
+        setShowSaveSuccess(false);
+      }, 3000);
+    }
+  };
+
   // 초기화 중이거나 API 키 초기화가 완료되지 않았을 때 로딩 표시
   if (isInitializing || !isInitialized) {
     return (
@@ -183,18 +216,18 @@ function App() {
           <p>작가의 마음으로 글을 이해하세요</p>
         </div>
         <div className='flex items-center gap-2'>
-          {messages.length > 0 && (
+          {savedConversations.length > 0 && (
             <button
-              onClick={() => setShowChatHistory(true)}
-              className='btn-icon btn-glow-effect hover:bg-purple-500 hover:bg-opacity-50 text-white hover:rotate-12 transition-transform rounded-modern'
-              title='대화 내역'
+              onClick={() => setShowSavedConversations(true)}
+              className='p-2 rounded-full text-white hover:bg-purple-500 hover:bg-opacity-50 hover:rotate-12 transition-all'
+              title='저장된 대화'
             >
-              <FaList className='text-lg' />
+              <FaBookmark className='text-lg' />
             </button>
           )}
           <button
             onClick={() => setShowSettings(true)}
-            className='btn-icon btn-glow-effect hover:bg-purple-500 hover:bg-opacity-50 text-white hover:rotate-12 transition-transform rounded-modern'
+            className='p-2 rounded-full text-white hover:bg-purple-500 hover:bg-opacity-50 hover:rotate-12 transition-all'
             title='API 키 설정'
           >
             <FaCog className='text-lg' />
@@ -206,6 +239,12 @@ function App() {
         {error && (
           <div className='glass-card bg-red-50 bg-opacity-90 border-l-4 border-red-500 text-red-700 p-4 animate-bounce-sm rounded-modern'>
             <p className='font-medium'>{error}</p>
+          </div>
+        )}
+
+        {showSaveSuccess && (
+          <div className='glass-card bg-green-50 bg-opacity-90 border-l-4 border-green-500 text-green-700 p-4 animate-bounce-sm rounded-modern'>
+            <p className='font-medium'>대화가 성공적으로 저장되었습니다.</p>
           </div>
         )}
 
@@ -230,6 +269,7 @@ function App() {
             isLoading={isLoading}
             onSendMessage={handleSendMessage}
             onEndChat={handleEndChat}
+            onSaveChat={handleSaveChat}
           />
         ) : (
           <PersonaCreator onCreatePersona={handleCreatePersona} isLoading={isLoading} />
@@ -237,11 +277,11 @@ function App() {
       </main>
 
       {showSettings && <ApiKeySettings onClose={handleCloseSettings} />}
-      {showChatHistory && (
+      {showSavedConversations && (
         <ChatHistory
-          messages={messages}
-          onClose={handleCloseChatHistory}
-          onClearHistory={handleEndChat}
+          messages={[]}
+          onClose={handleCloseSavedConversations}
+          onClearHistory={() => {}}
           currentUrl={currentUrl}
         />
       )}

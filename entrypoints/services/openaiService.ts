@@ -26,6 +26,8 @@ export const generatePersona = async (pageContent: string): Promise<string> => {
   try {
     const openai = getOpenAIInstance();
 
+    console.log('pageContent: ', pageContent);
+
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
