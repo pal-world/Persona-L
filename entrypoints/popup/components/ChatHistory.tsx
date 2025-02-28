@@ -90,7 +90,7 @@ const SearchInputComponent = memo(({ searchTerm, onSearchChange, inputRef }: Sea
 
 SearchInputComponent.displayName = 'SearchInputComponent';
 
-const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 수 없는 페이지' }) => {
+const ChatHistory = ({ onClose, currentUrl = '알 수 없는 페이지' }: ChatHistoryProps) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
@@ -384,12 +384,12 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
       {/* 삭제 확인 모달 - ConfirmDialog 컴포넌트로 대체 */}
       <ConfirmDialog
         isOpen={deleteConfirmId !== null}
-        title="대화 삭제 확인"
-        message="이 대화를 정말 삭제하시겠습니까?"
-        warningText="이 작업은 되돌릴 수 없습니다."
+        title='대화 삭제 확인'
+        message='이 대화를 정말 삭제하시겠습니까?'
+        warningText='이 작업은 되돌릴 수 없습니다.'
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
-        confirmText="삭제"
+        confirmText='삭제'
       />
 
       {/* 본문 콘텐츠 */}
