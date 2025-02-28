@@ -11,18 +11,9 @@ interface AnimatedPageProps {
 }
 
 const slideVariants = {
-  rightEntry: {
-    x: '100%',
-    zIndex: 10,
-  },
-  leftExit: {
-    x: '-100%',
-    zIndex: 10,
-  },
-  center: {
-    x: 0,
-    zIndex: 10,
-  },
+  rightEntry: { x: '100%', zIndex: 10 },
+  rightExit: { x: '100%', zIndex: 10 },
+  center: { x: 0, zIndex: 10 },
 };
 
 const AnimatedPage: React.FC<AnimatedPageProps> = ({
@@ -44,12 +35,8 @@ const AnimatedPage: React.FC<AnimatedPageProps> = ({
           className={`${positionClass} ${className} bg-white`}
           initial={direction === 'right' ? slideVariants.rightEntry : slideVariants.center}
           animate={slideVariants.center}
-          exit={slideVariants.leftExit}
-          transition={{
-            type: 'spring',
-            stiffness: 300,
-            damping: 30,
-          }}
+          exit={slideVariants.rightExit}
+          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
         >
           {children}
         </motion.div>
