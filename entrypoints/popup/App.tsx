@@ -127,7 +127,8 @@ function App() {
         return;
       }
 
-      const newPersona = await generatePersona(content);
+      // 두 번째 인자로 currentUrl 전달
+      const newPersona = await generatePersona(content, currentUrl);
 
       setPersona(newPersona.description);
       setPersonaNickname(newPersona.nickname);

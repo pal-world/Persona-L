@@ -27,7 +27,7 @@ export interface PersonaResponse {
   description: string;
 }
 
-export const generatePersona = async (pageContent: string): Promise<PersonaResponse> => {
+export const generatePersona = async (pageContent: string, pageUrl?: string): Promise<PersonaResponse> => {
   try {
     const openai = getOpenAIInstance();
 
@@ -44,7 +44,8 @@ export const generatePersona = async (pageContent: string): Promise<PersonaRespo
             '## 성격\n- [작가의 주요 성격 특성 1]\n- [작가의 주요 성격 특성 2]\n- [작가의 주요 성격 특성 3]\n\n' +
             '## 글쓰기 스타일\n- [작가의 글쓰기 스타일 특징 1]\n- [작가의 글쓰기 스타일 특징 2]\n\n' +
             '## 관점과 가치관\n- [작가의 세계관이나 주요 관점 1]\n- [작가의 세계관이나 주요 관점 2]\n\n' +
-            '## 배경/전문 분야\n- [작가의 추정 배경이나 전문 분야]',
+            '## 배경/전문 분야\n- [작가의 추정 배경이나 전문 분야]' +
+            (pageUrl ? `\n\n참고 URL: ${pageUrl}` : ''),
         },
         {
           role: 'user',
