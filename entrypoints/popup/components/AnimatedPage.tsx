@@ -16,14 +16,14 @@ const slideVariants = {
   center: { x: 0, zIndex: 10 },
 };
 
-const AnimatedPage: React.FC<AnimatedPageProps> = ({
+const AnimatedPage = ({
   children,
   direction = 'right',
   isVisible,
   onExitComplete,
   className = '',
   useFixedPosition = true,
-}) => {
+}: AnimatedPageProps) => {
   const positionClass = useFixedPosition
     ? 'fixed top-0 right-0 bottom-0 left-0 z-50 w-[400px] h-[600px]'
     : 'absolute inset-0 w-full h-full';

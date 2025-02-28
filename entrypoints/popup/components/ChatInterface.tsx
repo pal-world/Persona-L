@@ -87,7 +87,7 @@ const ChatInput = React.memo(
   },
 );
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ messages, onSendMessage, isLoading, onEndChat, onSaveChat }) => {
+const ChatInterface = ({ messages, onSendMessage, isLoading, onEndChat, onSaveChat }: ChatInterfaceProps) => {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

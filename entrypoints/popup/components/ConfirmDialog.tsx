@@ -12,7 +12,7 @@ interface ConfirmDialogProps {
   cancelText?: string;
 }
 
-const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
+const ConfirmDialog = ({
   isOpen,
   title,
   message,
@@ -20,8 +20,8 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
   confirmText = '확인',
-  cancelText = '취소'
-}) => {
+  cancelText = '취소',
+}: ConfirmDialogProps) => {
   if (!isOpen) return null;
 
   return (
