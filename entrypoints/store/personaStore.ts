@@ -11,6 +11,7 @@ interface Message {
 interface SavedConversation {
   id: string;
   persona: string; // 저장 시에는 문자열 형태로만 저장
+  personaNickname?: string; // 페르소나의 닉네임 (옵션)
   messages: Message[];
   url: string;
   timestamp: Date;
@@ -18,12 +19,14 @@ interface SavedConversation {
 
 interface PersonaState {
   persona: string | null;
+  personaNickname: string | null; // 페르소나 닉네임 추가
   messages: Message[];
   isLoading: boolean;
   error: string | null;
   savedConversations: SavedConversation[]; // 저장된 대화 목록
 
   setPersona: (persona: string) => void;
+  setPersonaNickname: (nickname: string) => void; // 닉네임 설정 함수 추가
   addMessage: (message: Message) => void;
   setIsLoading: (isLoading: boolean) => void;
   setError: (error: string | null) => void;
@@ -37,12 +40,14 @@ export const usePersonaStore = create<PersonaState>()(
   persist(
     (set, get) => ({
       persona: null,
+      personaNickname: null,
       messages: [],
       isLoading: false,
       error: null,
       savedConversations: [],
 
       setPersona: (persona) => set({ persona }),
+      setPersonaNickname: (nickname) => set({ personaNickname: nickname }),
       addMessage: (message) =>
         set((state) => ({
           messages: [...state.messages, message],
@@ -61,6 +66,7 @@ export const usePersonaStore = create<PersonaState>()(
           const newSavedConversation: SavedConversation = {
             id: Date.now().toString(), // 현재 시간을 ID로 사용
             persona: state.persona,
+            personaNickname: state.personaNickname || '이름 없는 작가', // 닉네임 저장
             messages: [...state.messages],
             url,
             timestamp: new Date(),
@@ -81,6 +87,7 @@ export const usePersonaStore = create<PersonaState>()(
       storage: createJSONStorage(() => localStorage), // 로컬 스토리지 사용
       partialize: (state) => ({
         persona: state.persona,
+        personaNickname: state.personaNickname,
         messages: state.messages,
         savedConversations: state.savedConversations, // 저장된 대화도 유지
       }), // 저장할 상태 선택

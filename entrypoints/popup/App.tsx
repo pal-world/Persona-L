@@ -14,10 +14,12 @@ import { initializeApiKey } from '../store/apiKeyStore';
 function App() {
   const {
     persona,
+    personaNickname,
     messages,
     isLoading,
     error,
     setPersona,
+    setPersonaNickname,
     addMessage,
     setIsLoading,
     setError,
@@ -127,7 +129,9 @@ function App() {
       }
 
       const newPersona = await generatePersona(content);
+
       setPersona(newPersona.description);
+      setPersonaNickname(newPersona.nickname);
 
       // 첫 메시지를 더 자세하게 구성
       const introMessage = `안녕하세요! 저는 "${newPersona.nickname}"입니다.
@@ -178,6 +182,7 @@ ${newPersona.description}
   const handleEndChat = () => {
     // 페르소나와 대화 내용 초기화
     setPersona('');
+    setPersonaNickname('');
     clearChat();
     setError(null);
   };
@@ -193,6 +198,7 @@ ${newPersona.description}
 
       // 페르소나와 대화 내용 초기화하여 페르소나 생성 페이지로 돌아가기
       setPersona('');
+      setPersonaNickname('');
       clearChat();
       setError(null);
 

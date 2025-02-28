@@ -1,17 +1,5 @@
-import React, { useCallback, useMemo, memo, useRef, useEffect, useState } from 'react';
-import {
-  FaArrowLeft,
-  FaSearch,
-  FaTrash,
-  FaChevronRight,
-  FaUser,
-  FaClock,
-  FaGlobe,
-  FaBookmark,
-  FaEllipsisV,
-  FaExclamationTriangle,
-  FaCommentAlt,
-} from 'react-icons/fa';
+import React, { useCallback, memo, useRef, useEffect, useState } from 'react';
+import { FaArrowLeft, FaSearch, FaTrash, FaGlobe, FaExclamationTriangle, FaCommentAlt, FaUser } from 'react-icons/fa';
 import MarkdownRenderer from './MarkdownRenderer';
 import { usePersonaStore } from '../../store/personaStore';
 import AnimatedPage from './AnimatedPage';
@@ -26,15 +14,6 @@ interface ChatHistoryProps {
   onClose: () => void;
   onClearHistory: () => void;
   currentUrl?: string; // 현재 페이지 URL
-}
-
-// 대화 그룹 인터페이스 정의
-interface ConversationGroup {
-  id: string;
-  title: string;
-  url: string; // 사이트 URL
-  messages: Message[];
-  timestamp: Date;
 }
 
 // 검색 입력 컴포넌트를 별도의 메모이즈된 컴포넌트로 분리
@@ -137,13 +116,23 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
     if (savedConversations.length === 0) return [];
 
     // 저장된 대화 처리
-    const groups = savedConversations.map((savedConv) => ({
-      id: savedConv.id,
-      title: formatUrl(savedConv.url),
-      url: savedConv.url,
-      messages: savedConv.messages,
-      timestamp: new Date(savedConv.timestamp),
-    }));
+    const groups = savedConversations.map((savedConv) => {
+      // 닉네임이 빈 문자열이거나 undefined, null인 경우 처리
+      const nickname =
+        savedConv.personaNickname &&
+        typeof savedConv.personaNickname === 'string' &&
+        savedConv.personaNickname.trim() !== ''
+          ? savedConv.personaNickname
+          : '이름 없는 작가';
+
+      return {
+        id: savedConv.id,
+        title: nickname,
+        url: savedConv.url,
+        messages: savedConv.messages,
+        timestamp: new Date(savedConv.timestamp),
+      };
+    });
 
     // 최신 대화가 상단에 오도록 정렬
     return groups.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
@@ -231,26 +220,6 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
       document.head.removeChild(style);
     };
   }, []);
-
-  // 날짜 포맷팅 함수
-  const formatDate = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / (1000 * 60));
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-    if (diffMins < 1) return '방금 전';
-    if (diffMins < 60) return `${diffMins}분 전`;
-    if (diffHours < 24) return `${diffHours}시간 전`;
-    if (diffDays < 7) return `${diffDays}일 전`;
-
-    return date.toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
 
   // 저장된 대화 삭제 핸들러
   const handleDeleteSavedConversation = (id: string, e: React.MouseEvent) => {
@@ -361,8 +330,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
             <FaArrowLeft className='w-5 h-5' />
           </button>
           <div className='flex flex-col items-center'>
-            <h1 className='text-xl font-bold text-white'>대화 내용</h1>
-            {selectedGroup.url && <p className='text-sm text-white/80 mt-1'>{new URL(selectedGroup.url).hostname}</p>}
+            <h1 className='text-xl font-bold text-white'>{selectedGroup.title}</h1>
           </div>
           <button
             onClick={(e) => handleDeleteSavedConversation(selectedGroup.id, e)}
@@ -375,6 +343,23 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
 
         <div className='flex-1 overflow-y-auto p-4 bg-gray-50'>
           <div className='max-w-3xl mx-auto space-y-4 pt-1'>
+            {selectedGroup.url && (
+              <div className='mb-4 p-3 bg-white rounded-lg border-l-4 border-purple-300 shadow-sm'>
+                <div className='flex items-start'>
+                  <FaGlobe className='text-purple-500 mr-2 mt-1 flex-shrink-0' />
+                  <div className='overflow-hidden'>
+                    <p className='text-sm text-gray-600'>
+                      이 대화는{' '}
+                      <span className='text-purple-600 font-medium break-all'>{formatUrl(selectedGroup.url)}</span>{' '}
+                      페이지에서 진행되었습니다.
+                    </p>
+                    <p className='text-xs text-gray-400 mt-1 truncate hover:text-clip hover:whitespace-normal'>
+                      {selectedGroup.url}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {selectedGroup.messages.map((message, index) => (
               <div
                 key={index}
@@ -454,11 +439,9 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
                         <div className='flex-1 min-w-0'>
                           <div className='flex items-center'>
                             <div className='w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-2 flex-shrink-0'>
-                              <FaGlobe className='text-purple-600 text-xs' />
+                              <FaUser className='text-purple-600 text-xs' />
                             </div>
-                            <p className='text-sm font-medium text-gray-900 truncate'>
-                              {group.url ? new URL(group.url).hostname : '알 수 없는 사이트'}
-                            </p>
+                            <p className='text-sm font-medium text-gray-900 truncate'>{group.title}</p>
                           </div>
                           <p className='text-xs text-gray-500 mt-1 ml-10'>
                             {new Date(group.timestamp).toLocaleString('ko-KR', {
