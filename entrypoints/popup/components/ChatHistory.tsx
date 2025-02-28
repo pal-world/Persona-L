@@ -430,12 +430,55 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ onClose, currentUrl = '알 �
     );
   };
 
-  // 선택된 그룹이 있으면 상세 화면을, 없으면 목록 화면을 표시
   return (
-    <>
-      {selectedGroupId !== null ? <ConversationDetailView /> : <ConversationListView />}
-      <DeleteConfirmModal />
-    </>
+    <div className='flex flex-col h-full w-full bg-white'>
+      {/* 삭제 확인 모달 */}
+      {deleteConfirmId && <DeleteConfirmModal />}
+
+      {/* 헤더 */}
+      <header className='sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'>
+        <div className='flex items-center'>
+          {selectedGroup ? (
+            <button
+              onClick={handleBackToList}
+              className='mr-2 hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors'
+            >
+              <FaArrowLeft />
+            </button>
+          ) : (
+            <FaBookmark className='mr-2' />
+          )}
+          <h2 className='text-lg font-semibold'>{selectedGroup ? formatUrl(selectedGroup.url) : '저장된 대화'}</h2>
+        </div>
+        <button onClick={onClose} className='hover:bg-white hover:bg-opacity-20 rounded-full p-2 transition-colors'>
+          <FaArrowLeft />
+        </button>
+      </header>
+
+      {/* 검색 입력 (대화 목록 화면에서만 표시) */}
+      {!selectedGroup && (
+        <SearchInputComponent searchTerm={searchTerm} onSearchChange={setSearchTerm} inputRef={searchInputRef} />
+      )}
+
+      {/* 본문 콘텐츠 */}
+      <div className='flex-1 overflow-y-auto'>
+        {!selectedGroup ? (
+          // 대화 목록 화면
+          <>
+            {conversationGroups.length === 0 ? (
+              <EmptyState />
+            ) : filteredGroups.length === 0 ? (
+              <NoSearchResults />
+            ) : (
+              <ConversationListView />
+            )}
+          </>
+        ) : (
+          // 대화 상세 화면
+          <ConversationDetailView />
+        )}
+      </div>
+    </div>
   );
 };
 

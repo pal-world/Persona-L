@@ -7,6 +7,7 @@ import ChatInterface from './components/ChatInterface';
 import PersonaCreator from './components/PersonaCreator';
 import ApiKeySettings from './components/ApiKeySettings';
 import ChatHistory from './components/ChatHistory';
+import AnimatedPage from './components/AnimatedPage';
 import { FaCog, FaSpinner, FaBookmark } from 'react-icons/fa';
 import { initializeApiKey } from '../store/apiKeyStore';
 
@@ -82,7 +83,7 @@ function App() {
   };
 
   const handleCloseSavedConversations = () => {
-    setShowSavedConversations(false);
+    // AnimatedPage가 애니메이션을 처리하므로 여기서는 아무 작업도 하지 않습니다.
   };
 
   const fetchPageContent = async (): Promise<string> => {
@@ -276,15 +277,18 @@ function App() {
         )}
       </main>
 
+      {/* API 키 설정은 모달 방식으로 표시 */}
       {showSettings && <ApiKeySettings onClose={handleCloseSettings} />}
-      {showSavedConversations && (
+
+      {/* 저장된 대화는 애니메이션 방식으로 표시 */}
+      <AnimatedPage isVisible={showSavedConversations} onExitComplete={() => setShowSavedConversations(false)}>
         <ChatHistory
           messages={[]}
-          onClose={handleCloseSavedConversations}
+          onClose={() => setShowSavedConversations(false)}
           onClearHistory={() => {}}
           currentUrl={currentUrl}
         />
-      )}
+      </AnimatedPage>
     </div>
   );
 }
