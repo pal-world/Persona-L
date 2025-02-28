@@ -8,6 +8,7 @@ import PersonaCreator from './components/PersonaCreator';
 import ApiKeySettings from './components/ApiKeySettings';
 import ChatHistory from './components/ChatHistory';
 import AnimatedPage from './components/AnimatedPage';
+import ConfirmDialog from './components/ConfirmDialog';
 import { FaCog, FaSpinner, FaBookmark } from 'react-icons/fa';
 import { initializeApiKey } from '../store/apiKeyStore';
 
@@ -34,6 +35,7 @@ function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [prevApiKey, setPrevApiKey] = useState<string | null>(null);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
   // 초기화
   useEffect(() => {
@@ -187,26 +189,40 @@ ${newPersona.description}
     setError(null);
   };
 
-  // 대화 저장 함수 추가
+  // 대화 저장 함수 수정
   const handleSaveChat = () => {
     if (persona && messages.length > 0) {
-      // 현재 대화 저장
-      saveCurrentConversation(currentUrl);
-
-      // 저장 성공 메시지 표시
-      setShowSaveSuccess(true);
-
-      // 페르소나와 대화 내용 초기화하여 페르소나 생성 페이지로 돌아가기
-      setPersona('');
-      setPersonaNickname('');
-      clearChat();
-      setError(null);
-
-      // 3초 후 성공 메시지 숨기기
-      setTimeout(() => {
-        setShowSaveSuccess(false);
-      }, 3000);
+      // 커스텀 확인 대화상자 표시
+      setShowSaveConfirm(true);
     }
+  };
+
+  // 저장 확인 처리 함수
+  const handleConfirmSave = () => {
+    // 현재 대화 저장
+    saveCurrentConversation(currentUrl);
+
+    // 저장 성공 메시지 표시
+    setShowSaveSuccess(true);
+
+    // 페르소나와 대화 내용 초기화하여 페르소나 생성 페이지로 돌아가기
+    setPersona('');
+    setPersonaNickname('');
+    clearChat();
+    setError(null);
+
+    // 확인 대화상자 닫기
+    setShowSaveConfirm(false);
+
+    // 3초 후 성공 메시지 숨기기
+    setTimeout(() => {
+      setShowSaveSuccess(false);
+    }, 3000);
+  };
+
+  // 저장 취소 처리 함수
+  const handleCancelSave = () => {
+    setShowSaveConfirm(false);
   };
 
   // 초기화 중이거나 API 키 초기화가 완료되지 않았을 때 로딩 표시
@@ -298,6 +314,15 @@ ${newPersona.description}
       >
         <ChatHistory onClose={() => setShowSavedConversations(false)} currentUrl={currentUrl} />
       </AnimatedPage>
+
+      {/* 커스텀 확인 대화상자 추가 */}
+      <ConfirmDialog
+        isOpen={showSaveConfirm}
+        title="대화 저장 확인"
+        message="대화를 저장하면 현재 대화가 종료되고 초기 화면으로 돌아갑니다. 계속하시겠습니까?"
+        onConfirm={handleConfirmSave}
+        onCancel={handleCancelSave}
+      />
     </div>
   );
 }
