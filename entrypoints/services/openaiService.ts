@@ -31,8 +31,6 @@ export const generatePersona = async (pageContent: string, pageUrl?: string): Pr
   try {
     const openai = getOpenAIInstance();
 
-    console.log('pageContent: ', pageContent);
-
     const response = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
@@ -44,8 +42,8 @@ export const generatePersona = async (pageContent: string, pageUrl?: string): Pr
             '## 성격\n- [작가의 주요 성격 특성 1]\n- [작가의 주요 성격 특성 2]\n- [작가의 주요 성격 특성 3]\n\n' +
             '## 글쓰기 스타일\n- [작가의 글쓰기 스타일 특징 1]\n- [작가의 글쓰기 스타일 특징 2]\n\n' +
             '## 관점과 가치관\n- [작가의 세계관이나 주요 관점 1]\n- [작가의 세계관이나 주요 관점 2]\n\n' +
-            '## 배경/전문 분야\n- [작가의 추정 배경이나 전문 분야]' +
-            (pageUrl ? `\n\n참고 URL: ${pageUrl}` : ''),
+            '## 배경/전문 분야\n- [작가의 추정 배경이나 전문 분야]\n\n' +
+            (pageUrl ? `${pageUrl}와 연결된 다른 페이지도 함께 분석해주세요.` : ''),
         },
         {
           role: 'user',
@@ -86,7 +84,7 @@ export const chatWithPersona = async ({
       content: `당신은 다음과 같은 페르소나를 가진 작가입니다: ${typeof persona === 'string' ? persona : persona?.description}. 
       ${typeof persona !== 'string' && persona?.nickname ? `당신의 닉네임은 "${persona.nickname}"입니다.` : ''}
       당신이 작성한 글에 대해 독자와 대화하고 있습니다. 당신의 페르소나에 맞게 대답해주세요. 
-      마크다운 형식으로 응답하여 텍스트를 강조하거나 구조화할 수 있습니다.`,
+      마크다운 형식으로 응답하여 텍스트를 강조하거나 구조화할 수 있습니다. 하지만 가능하면 진짜 사람과 대화하듯이 구어체로 응답해주세요.`,
     };
 
     // 초기 컨텍스트 메시지 생성 (작가의 글 내용)
