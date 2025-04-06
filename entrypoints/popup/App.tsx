@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { usePersonaStore } from '../store/personaStore';
-import { useApiKeyStore } from '../store/apiKeyStore';
 import { extractPageContent } from '../utils/pageContentExtractor';
-import { generatePersona, chatWithPersona } from '../services/openaiService';
+import { generatePersona, chatWithPersona } from '../services/supabaseApi';
 import ChatInterface from './components/ChatInterface';
 import PersonaCreator from './components/PersonaCreator';
 import ApiKeySettings from './components/ApiKeySettings';
@@ -10,7 +9,6 @@ import ChatHistory from './components/ChatHistory';
 import AnimatedPage from './components/AnimatedPage';
 import ConfirmDialog from './components/ConfirmDialog';
 import { FaCog, FaSpinner, FaBookmark } from 'react-icons/fa';
-import { initializeApiKey } from '../store/apiKeyStore';
 
 function App() {
   const {
@@ -26,14 +24,13 @@ function App() {
     clearChat,
     saveCurrentConversation,
     savedConversations,
+    clearPersona,
   } = usePersonaStore();
-  const { apiKey, isInitialized } = useApiKeyStore();
   const [pageContent, setPageContent] = useState<string>('');
   const [currentUrl, setCurrentUrl] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
   const [showSavedConversations, setShowSavedConversations] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
-  const [prevApiKey, setPrevApiKey] = useState<string | null>(null);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [showSaveConfirm, setShowSaveConfirm] = useState(false);
 
@@ -41,7 +38,6 @@ function App() {
   useEffect(() => {
     const initialize = async () => {
       setIsInitializing(true);
-      await initializeApiKey();
 
       // 현재 활성 탭의 URL 가져오기
       try {
@@ -59,30 +55,9 @@ function App() {
     initialize();
   }, []);
 
-  // API 키 변경 감지
-  useEffect(() => {
-    // 이전 API 키가 있고, 현재 API 키가 없는 경우 (API 키가 삭제된 경우)
-    if (prevApiKey && !apiKey) {
-      // 페르소나와 대화 내용 초기화
-      setPersona('');
-      clearChat();
-      setPageContent('');
-      setError(null);
-    }
-
-    // 현재 API 키 상태 저장
-    setPrevApiKey(apiKey);
-  }, [apiKey, prevApiKey, setPersona, clearChat, setError]);
-
-  // API 키가 변경될 때 에러 메시지 초기화
-  useEffect(() => {
-    if (apiKey) setError(null);
-  }, [apiKey, setError]);
-
   const handleCloseSettings = () => {
     setShowSettings(false);
-    // API 키 관련 에러 메시지 초기화
-    if (apiKey) setError(null);
+    setError(null);
   };
 
   const fetchPageContent = async (): Promise<string> => {
@@ -110,12 +85,6 @@ function App() {
   };
 
   const handleCreatePersona = async () => {
-    if (!apiKey) {
-      setError('API 키를 먼저 설정해주세요.');
-      setShowSettings(true);
-      return;
-    }
-
     setIsLoading(true);
 
     try {
@@ -132,7 +101,7 @@ function App() {
       // 두 번째 인자로 currentUrl 전달
       const newPersona = await generatePersona(content, currentUrl);
 
-      setPersona(newPersona.description);
+      setPersona(newPersona);
       setPersonaNickname(newPersona.nickname);
 
       // 첫 메시지를 더 자세하게 구성
@@ -180,10 +149,9 @@ ${newPersona.description}
     }
   };
 
-  // 채팅 종료 함수 추가
+  // 채팅 종료 함수
   const handleEndChat = () => {
-    // 페르소나와 대화 내용 초기화
-    setPersona('');
+    clearPersona();
     setPersonaNickname('');
     clearChat();
     setError(null);
@@ -199,22 +167,16 @@ ${newPersona.description}
 
   // 저장 확인 처리 함수
   const handleConfirmSave = () => {
-    // 현재 대화 저장
     saveCurrentConversation(currentUrl);
-
-    // 저장 성공 메시지 표시
     setShowSaveSuccess(true);
-
-    // 페르소나와 대화 내용 초기화하여 페르소나 생성 페이지로 돌아가기
-    setPersona('');
+    
+    clearPersona();
     setPersonaNickname('');
     clearChat();
     setError(null);
-
-    // 확인 대화상자 닫기
+    
     setShowSaveConfirm(false);
-
-    // 3초 후 성공 메시지 숨기기
+    
     setTimeout(() => {
       setShowSaveSuccess(false);
     }, 3000);
@@ -226,7 +188,7 @@ ${newPersona.description}
   };
 
   // 초기화 중이거나 API 키 초기화가 완료되지 않았을 때 로딩 표시
-  if (isInitializing || !isInitialized) {
+  if (isInitializing) {
     return (
       <div className='min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-50 via-white to-purple-100 w-[400px] h-[600px] font-sans'>
         <FaSpinner className='animate-spin text-purple-600 text-4xl mb-4' />
@@ -255,7 +217,7 @@ ${newPersona.description}
           <button
             onClick={() => setShowSettings(true)}
             className='p-2 rounded-full text-white hover:bg-purple-500 hover:bg-opacity-50 hover:rotate-12 transition-all'
-            title='API 키 설정'
+            title='설정'
           >
             <FaCog className='text-lg' />
           </button>
@@ -272,21 +234,6 @@ ${newPersona.description}
         {showSaveSuccess && (
           <div className='glass-card bg-green-50 bg-opacity-90 border-l-4 border-green-500 text-green-700 p-4 animate-bounce-sm rounded-modern'>
             <p className='font-medium'>대화가 성공적으로 저장되었습니다.</p>
-          </div>
-        )}
-
-        {!apiKey && (
-          <div className='glass-card p-5 flex flex-col items-center rounded-modern-lg animate-fade-in'>
-            <h2 className='text-xl font-semibold text-gray-800 mb-3 tracking-tight'>API 키 설정</h2>
-            <p className='text-gray-600 text-center mb-4 leading-relaxed'>
-              Persona-L을 사용하기 위해 OpenAI API 키가 필요합니다
-            </p>
-            <button
-              onClick={() => setShowSettings(true)}
-              className='btn btn-primary btn-glow-effect w-full py-2.5 rounded-modern animate-click'
-            >
-              API 키 설정하기
-            </button>
           </div>
         )}
 

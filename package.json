@@ -14,8 +14,8 @@
     "lint:fix": "eslint \"entrypoints/**/*.{js,jsx,ts,tsx}\" --fix"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
     "framer-motion": "^12.4.7",
-    "openai": "^4.28.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-icons": "^5.0.1",
