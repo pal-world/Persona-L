@@ -4,9 +4,9 @@ export const extractPageContent = (): string => {
 
   // 주요 콘텐츠 영역 찾기
   const mainContentSelectors = [
+    'body',
     'article',
     'main',
-    '.content',
     '.post',
     '.article',
     '#content',
@@ -22,6 +22,7 @@ export const extractPageContent = (): string => {
   for (const selector of mainContentSelectors) {
     const element = document.querySelector(selector);
     if (element && element.textContent && element.textContent.length > 100) {
+      console.log(selector, element.textContent.trim());
       return element.textContent.trim();
     }
   }
