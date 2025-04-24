@@ -169,14 +169,14 @@ ${newPersona.description}
   const handleConfirmSave = () => {
     saveCurrentConversation(currentUrl);
     setShowSaveSuccess(true);
-    
+
     clearPersona();
     setPersonaNickname('');
     clearChat();
     setError(null);
-    
+
     setShowSaveConfirm(false);
-    
+
     setTimeout(() => {
       setShowSaveSuccess(false);
     }, 3000);
@@ -226,8 +226,21 @@ ${newPersona.description}
 
       <main className='flex-1 overflow-auto p-4.5 flex flex-col gap-4.5'>
         {error && (
-          <div className='glass-card bg-red-50 bg-opacity-90 border-l-4 border-red-500 text-red-700 p-4 animate-bounce-sm rounded-modern'>
-            <p className='font-medium'>{error}</p>
+          <div className='glass-card bg-red-50 bg-opacity-90 border-l-4 border-red-500 text-red-700 p-4 animate-bounce-sm rounded-modern relative'>
+            <p className='font-medium pr-6'>{error}</p>
+            <button
+              onClick={() => setError(null)}
+              className='absolute top-2 right-2 text-red-700 hover:text-red-900 focus:outline-none'
+              aria-label='닫기'
+            >
+              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
+                <path
+                  fillRule='evenodd'
+                  d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
+                  clipRule='evenodd'
+                />
+              </svg>
+            </button>
           </div>
         )}
 
@@ -265,9 +278,9 @@ ${newPersona.description}
       {/* 커스텀 확인 대화상자 추가 */}
       <ConfirmDialog
         isOpen={showSaveConfirm}
-        title="대화 저장 확인"
-        message="대화를 저장하면 현재 대화가 종료되고 초기 화면으로 돌아갑니다. 계속하시겠습니까?"
-        warningText="이 작업은 되돌릴 수 없습니다."
+        title='대화 저장 확인'
+        message='대화를 저장하면 현재 대화가 종료되고 초기 화면으로 돌아갑니다. 계속하시겠습니까?'
+        warningText='이 작업은 되돌릴 수 없습니다.'
         onConfirm={handleConfirmSave}
         onCancel={handleCancelSave}
       />
