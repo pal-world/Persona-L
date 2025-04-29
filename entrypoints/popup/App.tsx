@@ -4,11 +4,20 @@ import { extractPageContent } from '../utils/pageContentExtractor';
 import { generatePersona, chatWithPersona } from '../services/supabaseApi';
 import ChatInterface from './components/ChatInterface';
 import PersonaCreator from './components/PersonaCreator';
-import ApiKeySettings from './components/ApiKeySettings';
+import UserSettings from './components/UserSettings';
 import ChatHistory from './components/ChatHistory';
 import AnimatedPage from './components/AnimatedPage';
 import ConfirmDialog from './components/ConfirmDialog';
 import { FaCog, FaSpinner, FaBookmark } from 'react-icons/fa';
+
+// uuid 생성 함수 (RFC4122 v4)
+function generateUuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
 
 function App() {
   const {
@@ -85,6 +94,14 @@ function App() {
   };
 
   const handleCreatePersona = async () => {
+    // 크롬 스토리지에서 personaUuid 확인 및 없으면 생성/저장
+    chrome.storage.sync.get('personaUuid', (result) => {
+      if (!result.personaUuid) {
+        const uuid = generateUuid();
+        chrome.storage.sync.set({ personaUuid: uuid });
+      }
+    });
+
     setIsLoading(true);
 
     try {
@@ -264,7 +281,7 @@ ${newPersona.description}
       </main>
 
       {/* API 키 설정은 모달 방식으로 표시 */}
-      {showSettings && <ApiKeySettings onClose={handleCloseSettings} />}
+      {showSettings && <UserSettings onClose={handleCloseSettings} />}
 
       {/* 저장된 대화는 애니메이션 방식으로 표시 */}
       <AnimatedPage

@@ -14,13 +14,7 @@ const UserSettings: React.FC<{ onClose: () => void }> = ({ onClose }) => {
   return (
     <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
       <div className='bg-white rounded-lg p-6 w-full max-w-md shadow-xl'>
-        <h2 className='text-xl font-bold mb-4'>설정</h2>
-
         <div className='mb-6'>
-          <p className='text-gray-600 mb-2'>
-            Persona-L은 Supabase를 통해 OpenAI API와 연결됩니다. <br />
-            별도의 API 키 설정이 필요하지 않습니다.
-          </p>
           <div className='mt-4 p-3 bg-gray-100 rounded'>
             <span className='font-semibold text-gray-700'>사용자 UUID: </span>
             {uuid ? (
