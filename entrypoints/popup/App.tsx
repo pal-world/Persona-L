@@ -1,23 +1,15 @@
 import { useState, useEffect } from 'react';
 import { usePersonaStore } from '../store/personaStore';
+import { useUserStore } from '../store/userStore';
 import { extractPageContent } from '../utils/pageContentExtractor';
 import { generatePersona, chatWithPersona } from '../services/supabaseApi';
 import ChatInterface from './components/ChatInterface';
 import PersonaCreator from './components/PersonaCreator';
-import UserSettings from './components/UserSettings';
 import ChatHistory from './components/ChatHistory';
 import AnimatedPage from './components/AnimatedPage';
 import ConfirmDialog from './components/ConfirmDialog';
-import { FaCog, FaSpinner, FaBookmark } from 'react-icons/fa';
-
-// uuid 생성 함수 (RFC4122 v4)
-function generateUuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
-}
+import ErrorMessage from './components/ErrorMessage';
+import { FaSpinner, FaBookmark } from 'react-icons/fa';
 
 function App() {
   const {
@@ -35,9 +27,12 @@ function App() {
     savedConversations,
     clearPersona,
   } = usePersonaStore();
+
+  // 사용자 정보 스토어에서 상태와 함수 가져오기
+  const { uuid, initializeUser } = useUserStore();
+
   const [pageContent, setPageContent] = useState<string>('');
   const [currentUrl, setCurrentUrl] = useState<string>('');
-  const [showSettings, setShowSettings] = useState(false);
   const [showSavedConversations, setShowSavedConversations] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
@@ -48,26 +43,31 @@ function App() {
     const initialize = async () => {
       setIsInitializing(true);
 
-      // 현재 활성 탭의 URL 가져오기
       try {
+        // 사용자 UUID 초기화
+        await initializeUser();
+
+        // 현재 활성 탭의 URL 가져오기
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
         if (tab && tab.url) {
           setCurrentUrl(tab.url);
         }
       } catch (err) {
-        console.error('URL 가져오기 오류:', err);
+        console.error('초기화 오류:', err);
       }
 
       setIsInitializing(false);
     };
 
     initialize();
-  }, []);
+  }, [initializeUser]);
 
-  const handleCloseSettings = () => {
-    setShowSettings(false);
-    setError(null);
-  };
+  // uuid 로깅 (개발용)
+  useEffect(() => {
+    if (uuid) {
+      console.log('현재 사용자 UUID:', uuid);
+    }
+  }, [uuid]);
 
   const fetchPageContent = async (): Promise<string> => {
     try {
@@ -94,13 +94,10 @@ function App() {
   };
 
   const handleCreatePersona = async () => {
-    // 크롬 스토리지에서 personaUuid 확인 및 없으면 생성/저장
-    chrome.storage.sync.get('personaUuid', (result) => {
-      if (!result.personaUuid) {
-        const uuid = generateUuid();
-        chrome.storage.sync.set({ personaUuid: uuid });
-      }
-    });
+    // UUID가 없는 경우 다시 초기화 시도
+    if (!uuid) {
+      await initializeUser();
+    }
 
     setIsLoading(true);
 
@@ -160,7 +157,15 @@ ${newPersona.description}
 
       addMessage({ role: 'assistant', content: response });
     } catch (err) {
-      setError('메시지 전송 중 오류가 발생했습니다.');
+      // 구체적인 에러 메시지가 있으면 표시
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('메시지 전송 중 오류가 발생했습니다.');
+      }
+
+      // 에러가 발생해도 사용자 메시지는 유지
+      console.error('채팅 에러:', err);
     } finally {
       setIsLoading(false);
     }
@@ -231,35 +236,11 @@ ${newPersona.description}
               <FaBookmark className='text-lg' />
             </button>
           )}
-          <button
-            onClick={() => setShowSettings(true)}
-            className='p-2 rounded-full text-white hover:bg-purple-500 hover:bg-opacity-50 hover:rotate-12 transition-all'
-            title='설정'
-          >
-            <FaCog className='text-lg' />
-          </button>
         </div>
       </header>
 
       <main className='flex-1 overflow-auto p-4.5 flex flex-col gap-4.5'>
-        {error && (
-          <div className='glass-card bg-red-50 bg-opacity-90 border-l-4 border-red-500 text-red-700 p-4 animate-bounce-sm rounded-modern relative'>
-            <p className='font-medium pr-6'>{error}</p>
-            <button
-              onClick={() => setError(null)}
-              className='absolute top-2 right-2 text-red-700 hover:text-red-900 focus:outline-none'
-              aria-label='닫기'
-            >
-              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5' viewBox='0 0 20 20' fill='currentColor'>
-                <path
-                  fillRule='evenodd'
-                  d='M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z'
-                  clipRule='evenodd'
-                />
-              </svg>
-            </button>
-          </div>
-        )}
+        {error && <ErrorMessage message={error} onClose={() => setError(null)} />}
 
         {showSaveSuccess && (
           <div className='glass-card bg-green-50 bg-opacity-90 border-l-4 border-green-500 text-green-700 p-4 animate-bounce-sm rounded-modern'>
@@ -279,9 +260,6 @@ ${newPersona.description}
           <PersonaCreator onCreatePersona={handleCreatePersona} isLoading={isLoading} />
         )}
       </main>
-
-      {/* API 키 설정은 모달 방식으로 표시 */}
-      {showSettings && <UserSettings onClose={handleCloseSettings} />}
 
       {/* 저장된 대화는 애니메이션 방식으로 표시 */}
       <AnimatedPage

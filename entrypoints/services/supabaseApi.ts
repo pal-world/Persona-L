@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { getUserUUID } from './userService';
 
 // 페르소나 응답 인터페이스
 export interface PersonaResponse {
@@ -16,6 +17,7 @@ export interface Message {
 interface GeneratePersonaRequest {
   pageContent: string;
   pageUrl?: string;
+  uuid?: string;
 }
 
 interface ChatWithPersonaRequest {
@@ -28,7 +30,58 @@ interface ChatWithPersonaRequest {
         description: string;
       };
   messages?: Array<{ role: 'user' | 'assistant'; content: string }>;
+  uuid?: string;
 }
+
+// 에러 응답 인터페이스
+interface ErrorResponse {
+  error?: string;
+  message?: string;
+}
+
+/**
+ * 서버 에러 메시지 추출 함수
+ * @param error 에러 객체
+ * @param defaultMessage 기본 에러 메시지
+ * @returns 에러 메시지
+ */
+const extractErrorMessage = (error: any, defaultMessage: string): string => {
+  // 에러 객체가 없는 경우 기본 메시지 반환
+  if (!error) return defaultMessage;
+
+  try {
+    // 에러 응답에 데이터가 있는 경우
+    if (error.response && error.response.data) {
+      const responseData = error.response.data as ErrorResponse;
+      if (responseData.error) return responseData.error;
+      if (responseData.message) return responseData.message;
+    }
+    
+    // Edge Function 에러 메시지가 있는 경우
+    if (error.message) {
+      // Edge Function 에러 응답이 JSON 문자열인 경우 파싱 시도
+      try {
+        if (error.message.includes('{') && error.message.includes('}')) {
+          const jsonStartIndex = error.message.indexOf('{');
+          const jsonEndIndex = error.message.lastIndexOf('}') + 1;
+          const jsonStr = error.message.substring(jsonStartIndex, jsonEndIndex);
+          const parsedError = JSON.parse(jsonStr) as ErrorResponse;
+          
+          if (parsedError.error) return parsedError.error;
+          if (parsedError.message) return parsedError.message;
+        }
+      } catch (_) {
+        // JSON 파싱 실패한 경우 원래 메시지 사용
+      }
+      
+      return error.message;
+    }
+  } catch (_) {
+    // 에러 파싱 중 문제가 발생한 경우 기본 메시지 반환
+  }
+
+  return defaultMessage;
+};
 
 /**
  * 페르소나 생성 함수
@@ -37,16 +90,20 @@ interface ChatWithPersonaRequest {
  * @returns PersonaResponse 객체
  */
 export const generatePersona = async (pageContent: string, pageUrl?: string): Promise<PersonaResponse> => {
-  const payload: GeneratePersonaRequest = { pageContent, pageUrl };
-  
+  // 사용자 UUID 가져오기
+  const uuid = await getUserUUID();
+
+  const payload: GeneratePersonaRequest = { pageContent, pageUrl, uuid };
+
   const { data, error } = await supabase.functions.invoke('openai/generate-persona', {
-    body: payload
+    body: payload,
   });
-  
+
   if (error) {
-    throw new Error(error.message || '페르소나 생성에 실패했습니다.');
+    console.error('페르소나 생성 에러:', error);
+    throw new Error(extractErrorMessage(error, '페르소나 생성에 실패했습니다.'));
   }
-  
+
   return data as PersonaResponse;
 };
 
@@ -56,13 +113,20 @@ export const generatePersona = async (pageContent: string, pageUrl?: string): Pr
  * @returns 응답 문자열
  */
 export const chatWithPersona = async (params: ChatWithPersonaRequest): Promise<string> => {
+  // 사용자 UUID 가져오기
+  const uuid = await getUserUUID();
+
+  // 요청 파라미터에 UUID 추가
+  const requestParams = { ...params, uuid };
+
   const { data, error } = await supabase.functions.invoke('openai/chat-with-persona', {
-    body: params
+    body: requestParams,
   });
-  
+
   if (error) {
-    throw new Error(error.message || '채팅 응답 생성에 실패했습니다.');
+    console.error('채팅 응답 생성 에러:', error);
+    throw new Error(extractErrorMessage(error, '채팅 응답 생성에 실패했습니다.'));
   }
-  
+
   return (data as { response: string }).response;
-}; 
+};
