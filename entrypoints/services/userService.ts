@@ -54,4 +54,33 @@ export const registerUserToServer = async (uuid: string): Promise<void> => {
   if (error) {
     throw new Error(`사용자 등록 실패: ${error.message}`);
   }
+};
+
+/**
+ * 사용자 요청 정보 인터페이스
+ */
+export interface UserRequestInfo {
+  uuid: string;
+  used: number;
+  remaining: number;
+  total: number;
+}
+
+/**
+ * 사용자의 요청 정보 조회 함수
+ * @returns 사용자의 요청 정보
+ */
+export const getUserRequestInfo = async (): Promise<UserRequestInfo> => {
+  const uuid = await getUserUUID();
+  
+  // URL 파라미터로 uuid를 전달하여 GET 요청
+  const { data, error } = await supabase.functions.invoke(`user?uuid=${uuid}`, {
+    method: 'GET'
+  });
+  
+  if (error) {
+    throw new Error(`요청 정보 조회 실패: ${error.message}`);
+  }
+  
+  return data as UserRequestInfo;
 }; 

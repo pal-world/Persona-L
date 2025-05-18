@@ -9,6 +9,7 @@ import ChatHistory from './components/ChatHistory';
 import AnimatedPage from './components/AnimatedPage';
 import ConfirmDialog from './components/ConfirmDialog';
 import ErrorMessage from './components/ErrorMessage';
+import RequestInfoBadge from './components/RequestInfoBadge';
 import { FaSpinner, FaBookmark } from 'react-icons/fa';
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
   } = usePersonaStore();
 
   // 사용자 정보 스토어에서 상태와 함수 가져오기
-  const { uuid, initializeUser } = useUserStore();
+  const { uuid, initializeUser, requestInfo, refreshRequestInfo } = useUserStore();
 
   const [pageContent, setPageContent] = useState<string>('');
   const [currentUrl, setCurrentUrl] = useState<string>('');
@@ -102,6 +103,18 @@ function App() {
     setIsLoading(true);
 
     try {
+      // 요청 전 남은 요청 수 확인
+      if (!requestInfo || requestInfo.remaining <= 0) {
+        // 최신 정보 확인을 위해 갱신
+        const updatedInfo = await refreshRequestInfo();
+        
+        if (!updatedInfo || updatedInfo.remaining <= 0) {
+          setError('남은 요청 횟수가 없습니다. 나중에 다시 시도해주세요.');
+          setIsLoading(false);
+          return;
+        }
+      }
+
       // 페르소나 생성 버튼 클릭 시 페이지 콘텐츠 가져오기
       const content = await fetchPageContent();
       setPageContent(content);
@@ -129,6 +142,9 @@ ${newPersona.description}
         role: 'assistant',
         content: introMessage,
       });
+
+      // 페르소나 생성 후 요청 정보 갱신
+      refreshRequestInfo();
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -143,10 +159,21 @@ ${newPersona.description}
   const handleSendMessage = async (message: string) => {
     if (!message.trim() || !persona) return;
 
-    addMessage({ role: 'user', content: message });
-    setIsLoading(true);
-
     try {
+      // 남은 요청 수 확인
+      if (!requestInfo || requestInfo.remaining <= 0) {
+        // 최신 정보 확인을 위해 갱신
+        const updatedInfo = await refreshRequestInfo();
+        
+        if (!updatedInfo || updatedInfo.remaining <= 0) {
+          setError('남은 요청 횟수가 없습니다. 나중에 다시 시도해주세요.');
+          return;
+        }
+      }
+      
+      addMessage({ role: 'user', content: message });
+      setIsLoading(true);
+
       // 이전 대화 내용을 포함하여 API 호출
       const response = await chatWithPersona({
         prompt: message,
@@ -156,6 +183,9 @@ ${newPersona.description}
       });
 
       addMessage({ role: 'assistant', content: response });
+      
+      // 메시지를 성공적으로 보낸 후 요청 정보 갱신
+      refreshRequestInfo();
     } catch (err) {
       // 구체적인 에러 메시지가 있으면 표시
       if (err instanceof Error) {
@@ -227,6 +257,7 @@ ${newPersona.description}
           <p>작가의 마음으로 글을 이해하세요</p>
         </div>
         <div className='flex items-center gap-2'>
+          <RequestInfoBadge className="mr-2" />
           {savedConversations.length > 0 && (
             <button
               onClick={() => setShowSavedConversations(true)}
