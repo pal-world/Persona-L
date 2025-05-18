@@ -45,18 +45,24 @@ interface ErrorResponse {
  * @param defaultMessage 기본 에러 메시지
  * @returns 에러 메시지
  */
-const extractErrorMessage = (error: any, defaultMessage: string): string => {
+const extractErrorMessage = async (error: any, defaultMessage: string): Promise<string> => {
   // 에러 객체가 없는 경우 기본 메시지 반환
   if (!error) return defaultMessage;
 
   try {
+    const errorJson = await error.context.json();
+
+    // errorJson.error가 존재하면 해당 오류 메시지 반환
+    if (errorJson && errorJson.error) return errorJson.error;
+
+    // 밑에 로직 필요없다면 삭제해도 됨
     // 에러 응답에 데이터가 있는 경우
     if (error.response && error.response.data) {
       const responseData = error.response.data as ErrorResponse;
       if (responseData.error) return responseData.error;
       if (responseData.message) return responseData.message;
     }
-    
+
     // Edge Function 에러 메시지가 있는 경우
     if (error.message) {
       // Edge Function 에러 응답이 JSON 문자열인 경우 파싱 시도
@@ -66,14 +72,14 @@ const extractErrorMessage = (error: any, defaultMessage: string): string => {
           const jsonEndIndex = error.message.lastIndexOf('}') + 1;
           const jsonStr = error.message.substring(jsonStartIndex, jsonEndIndex);
           const parsedError = JSON.parse(jsonStr) as ErrorResponse;
-          
+
           if (parsedError.error) return parsedError.error;
           if (parsedError.message) return parsedError.message;
         }
       } catch (_) {
         // JSON 파싱 실패한 경우 원래 메시지 사용
       }
-      
+
       return error.message;
     }
   } catch (_) {
@@ -101,7 +107,7 @@ export const generatePersona = async (pageContent: string, pageUrl?: string): Pr
 
   if (error) {
     console.error('페르소나 생성 에러:', error);
-    throw new Error(extractErrorMessage(error, '페르소나 생성에 실패했습니다.'));
+    throw new Error(await extractErrorMessage(error, '페르소나 생성에 실패했습니다.'));
   }
 
   return data as PersonaResponse;
@@ -125,7 +131,7 @@ export const chatWithPersona = async (params: ChatWithPersonaRequest): Promise<s
 
   if (error) {
     console.error('채팅 응답 생성 에러:', error);
-    throw new Error(extractErrorMessage(error, '채팅 응답 생성에 실패했습니다.'));
+    throw new Error(await extractErrorMessage(error, '채팅 응답 생성에 실패했습니다.'));
   }
 
   return (data as { response: string }).response;
